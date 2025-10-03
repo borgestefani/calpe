@@ -46,7 +46,7 @@ O índice de Flesch adaptado ao português é calculado como:
 
 ## 📄 Citação
 
-Se utilizar a CALPE em trabalhos acadêmicos, sugira a seguinte referência:
+Se utilizar a CALPES em trabalhos acadêmicos, indique a seguinte referência:
 
 BORGES, S.S. CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde (versão web). 2025.
 Disponível em: https://borgestefani.github.io/calpes/

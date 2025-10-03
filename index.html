@@ -32,7 +32,12 @@
     margin-top:20px;
   }
   @media (max-width: 900px){ .grid{ grid-template-columns:1fr } }
-
+    
+/* Blocos fora da grid (Exportação e Social) */
+.section { 
+  margin-top:16px;   /* mesmo valor do gap da grid */
+}
+    
   .card{
     background: var(--card);
     border: 1px solid var(--border);
@@ -134,15 +139,15 @@
           <div class="inputs" style="margin-top:12px">
             <div>
               <label class="small muted">Frases</label>
-              <input id="sentencesManual" type="number" min="0" placeholder="auto" />
+              <input id="sentencesManual" type="number" min="0" placeholder="digite" />
             </div>
             <div>
               <label class="small muted">Palavras</label>
-              <input id="wordsManual" type="number" min="0" placeholder="auto" />
+              <input id="wordsManual" type="number" min="0" placeholder="digite" />
             </div>
             <div>
               <label class="small muted">Sílabas</label>
-              <input id="syllablesManual" type="number" min="0" placeholder="auto" />
+              <input id="syllablesManual" type="number" min="0" placeholder="digite" />
             </div>
           </div>
         </div>
@@ -191,7 +196,7 @@
     </div><!-- /grid -->
 
     <!-- === AÇÕES / EXPORTAÇÃO (fora do grid, largura total) === -->
-    <div class="card pad" style="margin-top:10px">
+    <div class="card pad section">
       <div class="row" style="align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
         <button id="save">Salvar contagem</button>
         <button id="exportAll" class="secondary">Exportar análises salvas</button>
@@ -206,7 +211,7 @@
     </div>
 
     <!-- === SOCIAL (fora do grid, largura total) === -->
-    <div class="card pad" style="margin-top:10px; text-align:center;">
+   <div class="card pad section" style="text-align:center;">
       <p class="small muted">Saiba mais sobre meu trabalho:</p>
       <div class="social-row">
         <a class="social-item" href="https://lattes.cnpq.br/6753755414872565" target="_blank" rel="noopener">
@@ -225,7 +230,7 @@
         </a>
       </div>
       <p class="foot" style="margin-top:15px">
-        © 2025 CALPES · Stéfani Borges · Licença MIT · Esta é uma ferramenta educacional.
+        © 2025 CALPES · Stéfani Borges · Licença MIT
       </p>
     </div>
 

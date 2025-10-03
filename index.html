@@ -399,62 +399,53 @@
     }
   }
 
-  async function downloadAsXlsx(){
-    try{
-      showToast('Preparando exportação…');
-      await window.__XLSXReady;
-      if (typeof XLSX === 'undefined') throw new Error('XLSX indisponível');
-
-      if (!window.__lastResult) {
-        const txt = (document.getElementById('text').value || '').trim();
-        if (!txt) { alert('Cole um texto e clique em Calcular antes de baixar.'); return; }
-        const prev = analyzedCount; compute(); analyzedCount = prev; updateSavedInfo(); persistState();
-        if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
-      }
-
-      const r = window.__lastResult;
-      const resultados = [
-        ['Campo','Valor'],
-        ['Frases', r.sentences],
-        ['Palavras', r.words],
-        ['Sílabas', r.syllables],
-        ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
-        ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
-        ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
-        ['Classificação', r.classification],
-        ['Gerado em', new Date().toISOString()]
-      ];
-      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
-
-      const texto = document.getElementById('text').value || '';
-      const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
-      XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
-      XLSX.writeFile(wb, 'calpes_resultados.xlsx');
-    }catch(e){
-      console.warn('XLSX indisponível, usando CSV.', e);
-      const r = window.__lastResult;
-      if (!r) { alert('Calcule primeiro.'); return; }
-      const lines = [
-        'Campo;Valor',
-        `Frases;${r.sentences}`,
-        `Palavras;${r.words}`,
-        `Sílabas;${r.syllables}`,
-        `wps;${Number(r.wps).toFixed(2)}`,
-        `spw;${Number(r.spw).toFixed(2)}`,
-        `Indice_Flesch;${Number(r.score).toFixed(1)}`,
-        `Classificação;${r.classification}`,
-        '',
-        'Texto avaliado;'
-      ];
-      const texto = (document.getElementById('text').value||'').replace(/\r?\n/g,' ');
-      lines.push(`"${texto.replace(/"/g,'""')}"`);
-      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'calpes_resultados.csv'; a.click(); URL.revokeObjectURL(a.href);
+  // ===== Exportar resultado atual (somente resultados, UTF-8) =====
+async function downloadAsXlsx() {
+  try {
+    await window.__XLSXReady;
+    if (typeof XLSX === 'undefined') {
+      alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
+      return;
     }
+    if (!window.__lastResult) {
+      const txt = (document.getElementById('text').value || '').trim();
+      if (!txt) {
+        alert('Cole um texto e clique em Calcular antes de baixar.');
+        return;
+      }
+      compute();
+      if (!window.__lastResult) {
+        alert('Não foi possível gerar o resultado.');
+        return;
+      }
+    }
+
+    const r = window.__lastResult;
+
+    const resultados = [
+      ['Campo', 'Valor'],
+      ['Frases', r.sentences],
+      ['Palavras', r.words],
+      ['Sílabas', r.syllables],
+      ['Palavras por frase', Number(r.wps).toFixed(2)],
+      ['Sílabas por palavra', Number(r.spw).toFixed(2)],
+      ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
+      ['Classificação', r.classification],
+      ['Gerado em', new Date().toLocaleString('pt-BR')]
+    ];
+
+    // cria a planilha apenas com os resultados
+    const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
+
+    XLSX.writeFile(wb, 'calpes_resultados.xlsx', { compression: true });
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
   }
+}
 
   /* ===== Listeners ===== */
   document.addEventListener('DOMContentLoaded', async function(){

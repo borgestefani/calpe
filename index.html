@@ -465,7 +465,7 @@ async function downloadAsXlsx() {
       const text = r
         ? `Índice de Leiturabilidade de Flesch: ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
         : 'Sem resultados ainda.';
-      navigator.clipboard.writeText(text).then(()=> showToast('Resumo copiado!'));
+      navigator.clipboard.writeText(text).then(()=> showToast('Resultado atual copiado!'));
     });
 
     document.getElementById('save')?.addEventListener('click', saveCurrent);

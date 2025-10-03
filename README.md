@@ -40,7 +40,9 @@ O índice de Flesch adaptado ao português é calculado como:
 
 ## 📥 Resultados
 
-- É possível **baixar os resultados**.  
+- É possível **baixar os resultados em Excel (.xlsx)**.  
+- Também é possível **copiar um resumo em texto** para colar em relatórios ou artigos.  
+  
 
 ---
 

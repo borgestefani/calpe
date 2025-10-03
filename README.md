@@ -43,6 +43,13 @@ O índice de Flesch adaptado ao português é calculado como:
 - É possível **baixar os resultados em Excel (.xlsx)**.  
 - Também é possível **copiar um resumo em texto** para colar em relatórios ou artigos.  
   
+---
+
+## 📖 Histórico de desenvolvimento
+
+A CALPES foi originalmente desenvolvida em VBA (Visual Basic for Applications) para Excel, com o objetivo de analisar a legibilidade de materiais educativos em saúde.
+
+Posteriormente, o código foi adaptado e transformado em uma aplicação web (HTML, CSS e JavaScript) com apoio do ChatGPT (OpenAI, versão GPT-5), mantendo a lógica original e ampliando a acessibilidade da ferramenta para uso direto no navegador.
 
 ---
 
@@ -52,7 +59,6 @@ Se utilizar a CALPES em trabalhos acadêmicos, indique a seguinte referência:
 
 BORGES, S.S. CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde (versão web). 2025.
 Disponível em: https://borgestefani.github.io/calpes/
-
 
 ---
 

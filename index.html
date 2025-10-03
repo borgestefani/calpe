@@ -166,11 +166,17 @@
     </div>
 
     <div class="card pad" style="margin-top:10px">
-      <div class="row">
-        <button id="downloadXlsx" class="secondary">Baixar resultados (.xlsx)</button>
-        <button id="copy" class="secondary">Copiar resumo</button>
-      </div>
-    </div>
+  <div class="row" style="align-items:center; gap:10px;">
+    <button id="save">Salvar contagem</button>
+    <button id="exportAll" class="secondary">Exportar todas (.xlsx)</button>
+    <button id="downloadXlsx" class="secondary">Baixar resultados (.xlsx)</button>
+    <button id="copy" class="secondary">Copiar resumo</button>
+    <button id="clearAll" class="secondary">Zerar armazenamento</button>
+
+    <span class="muted small" id="savedInfo" style="margin-left:auto;">0 salvas</span>
+    <span class="muted small" id="analyzedInfo">0 analisados</span>
+  </div>
+</div>
 
     <div class="card pad" style="margin-top:10px; text-align:center;">
       <h2>Conecte-se</h2>
@@ -193,7 +199,7 @@
       </div>
     </div>
 
-    <p class="foot" style="margin-top:15px">© 2025 CALPES · Licença MIT · Esta é uma ferramenta educacional.</p>
+    <p class="foot" style="margin-top:15px">© 2025 CALPES · Stéfani Borges · Licença MIT · Esta é uma ferramenta educacional.</p>
   </div>
 
   <!-- Biblioteca para gerar Excel -->
@@ -262,53 +268,61 @@
     }
 
     // Exportar como Excel (.xlsx)
-    function downloadAsXlsx() {
-      if (!window.__lastResult) {
-        alert('Calcule primeiro para gerar o arquivo.');
-        return;
-      }
-      const r = window.__lastResult;
-
-      const resultados = [
-        ['Campo', 'Valor'],
-        ['Frases', r.sentences],
-        ['Palavras', r.words],
-        ['Sílabas', r.syllables],
-        ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
-        ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
-        ['Índice de Leiturabilidade de Flesch (pt-BR)', Number(r.score).toFixed(1)],
-        ['Classificação', r.classification],
-        ['Gerado em', new Date().toISOString()]
-      ];
-      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
-
-      const texto = document.getElementById('text').value || '';
-      const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
-      XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
-      XLSX.writeFile(wb, 'calpes_resultados.xlsx');
+    <script>
+function downloadAsXlsx() {
+  try {
+    // 1) biblioteca carregada?
+    if (typeof XLSX === 'undefined') {
+      alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
+      console.error('XLSX undefined — verifique a rede/CDN.');
+      return;
     }
 
-    document.getElementById('calc').addEventListener('click', compute);
-    document.getElementById('clear').addEventListener('click', ()=>{
-      document.getElementById('text').value = '';
-      ['sentencesOut','wordsOut','syllablesOut','wpsOut','spwOut','scoreOut','classOut'].forEach(id=>{
-        document.getElementById(id).textContent = '–';
-      });
-      window.__lastResult = null;
-    });
-    document.getElementById('downloadXlsx').addEventListener('click', downloadAsXlsx);
+    // 2) se não tiver resultado calculado, tenta calcular
+    if (!window.__lastResult) {
+      const txt = (document.getElementById('text').value || '').trim();
+      if (!txt) {
+        alert('Cole um texto e clique em Calcular antes de baixar.');
+        return;
+      }
+      compute(); // gera __lastResult
+      if (!window.__lastResult) {
+        alert('Não foi possível gerar o resultado.');
+        return;
+      }
+    }
 
-    document.getElementById('copy').addEventListener('click', ()=>{
-      const r = window.__lastResult;
-      const text = r
-        ? `Índice de Leiturabilidade de Flesch: ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
-        : 'Sem resultados ainda.';
-      navigator.clipboard.writeText(text);
-    });
-  </script>
+    const r = window.__lastResult;
+
+    // Aba 1: Resultados
+    const resultados = [
+      ['Campo', 'Valor'],
+      ['Frases', r.sentences],
+      ['Palavras', r.words],
+      ['Sílabas', r.syllables],
+      ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
+      ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
+      ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
+      ['Classificação', r.classification],
+      ['Gerado em', new Date().toISOString()]
+    ];
+    const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
+
+    // Aba 2: Texto
+    const texto = document.getElementById('text').value || '';
+    const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
+    XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
+
+    XLSX.writeFile(wb, 'calpes_resultados.xlsx');
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
+  }
+}
+</script>
 </body>
 </html>
 

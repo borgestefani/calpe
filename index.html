@@ -94,23 +94,38 @@
   .link{color:#2563eb;text-decoration:none}
   </style>
 
-  <!-- Carrega SheetJS com fallback e sinaliza quando estiver pronto -->
+  <!-- Carrega SheetJS com fallback e timeout -->
 <script>
-  window.__XLSXReady = new Promise((resolve) => {
-    function done(){ console.log("SheetJS carregado."); resolve(); }
+  // Promise global indicando quando o XLSX está pronto
+  window.__XLSXReady = new Promise((resolve, reject) => {
+    let settled = false;
+    function done() {
+      if (!settled) { settled = true; console.log("SheetJS carregado."); resolve(); }
+    }
+    function fail(msg) {
+      if (!settled) { settled = true; console.warn(msg); reject(new Error(msg)); }
+    }
+
+    // timeout de segurança (10s)
+    const t = setTimeout(() => fail("Timeout ao carregar SheetJS."), 10000);
+
+    // tenta jsDelivr
     const s = document.createElement('script');
     s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js";
-    s.onload = done;
-    s.onerror = function(){
+    s.onload = () => { clearTimeout(t); done(); };
+    s.onerror = () => {
+      // fallback: unpkg
       console.warn("Falha no jsDelivr; tentando unpkg…");
       const f = document.createElement('script');
       f.src = "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js";
-      f.onload = done;
+      f.onload = () => { clearTimeout(t); done(); };
+      f.onerror = () => { clearTimeout(t); fail("Falha ao carregar SheetJS (ambas as CDNs)."); };
       document.head.appendChild(f);
     };
     document.head.appendChild(s);
   });
 </script>
+
 </head>
 <body>
   <div class="wrap">

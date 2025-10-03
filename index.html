@@ -94,22 +94,23 @@
   .link{color:#2563eb;text-decoration:none}
   </style>
 
-  <!-- Carrega SheetJS com fallback (jsDelivr -> unpkg) -->
-  <script>
-    (function loadXLSX(){
-      var s = document.createElement('script');
-      s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js";
-      s.onload = function(){ console.log("SheetJS carregado (jsDelivr)"); };
-      s.onerror = function(){
-        console.warn("Falha no jsDelivr; tentando unpkg…");
-        var f = document.createElement('script');
-        f.src = "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js";
-        f.onload = function(){ console.log("SheetJS carregado (unpkg)"); };
-        document.head.appendChild(f);
-      };
-      document.head.appendChild(s);
-    })();
-  </script>
+  <!-- Carrega SheetJS com fallback e sinaliza quando estiver pronto -->
+<script>
+  window.__XLSXReady = new Promise((resolve) => {
+    function done(){ console.log("SheetJS carregado."); resolve(); }
+    const s = document.createElement('script');
+    s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js";
+    s.onload = done;
+    s.onerror = function(){
+      console.warn("Falha no jsDelivr; tentando unpkg…");
+      const f = document.createElement('script');
+      f.src = "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js";
+      f.onload = done;
+      document.head.appendChild(f);
+    };
+    document.head.appendChild(s);
+  });
+</script>
 </head>
 <body>
   <div class="wrap">
@@ -292,6 +293,7 @@
     // contador de análises
     analyzedCount += 1;
     updateSavedInfo();
+    persistState();
   }
 
   // ===== Armazenamento & Exportação múltipla =====
@@ -333,90 +335,103 @@
     updateSavedInfo();
   }
 
-  function exportAllXlsx() {
-    if (typeof XLSX === 'undefined') {
-      alert('Biblioteca do Excel não carregou. Recarregue a página.');
-      return;
-    }
-    if (saved.length === 0) {
-      alert('Não há contagens salvas para exportar.');
-      return;
-    }
-    const header = ['#', 'Data/Hora', 'Frases', 'Palavras', 'Sílabas', 'wps', 'spw',
-                    'Índice de Leiturabilidade de Flesch', 'Classificação', 'Trecho do texto'];
-    const rows = [header];
-
-    saved.forEach((r, i) => {
-      rows.push([
-        i + 1,
-        r.createdAt,
-        r.sentences,
-        r.words,
-        r.syllables,
-        r.wps.toFixed(2),
-        r.spw.toFixed(2),
-        r.score.toFixed(1),
-        r.classification,
-        r.snippet
-      ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Todas as contagens');
-    XLSX.writeFile(wb, 'calpes_todas_as_contagens.xlsx');
+  async function exportAllXlsx() {
+  await window.__XLSXReady;
+  if (typeof XLSX === 'undefined') {
+    alert('Biblioteca do Excel não carregou. Recarregue a página.');
+    return;
   }
+  if (saved.length === 0) {
+    alert('Não há contagens salvas para exportar.');
+    return;
+  }
+  const header = ['#', 'Data/Hora', 'Frases', 'Palavras', 'Sílabas', 'wps', 'spw',
+                  'Índice de Leiturabilidade de Flesch', 'Classificação', 'Trecho do texto'];
+  const rows = [header];
+
+  saved.forEach((r, i) => {
+    rows.push([
+      i + 1,
+      r.createdAt,
+      r.sentences,
+      r.words,
+      r.syllables,
+      r.wps.toFixed(2),
+      r.spw.toFixed(2),
+      r.score.toFixed(1),
+      r.classification,
+      r.snippet
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Todas as contagens');
+  XLSX.writeFile(wb, 'calpes_todas_as_contagens.xlsx');
+}
 
   // ===== Exportar resultado atual =====
-  function downloadAsXlsx() {
-    try {
-      if (typeof XLSX === 'undefined') {
-        alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
-        console.error('XLSX undefined — verifique a rede/CDN.');
+  async function downloadAsXlsx() {
+  try {
+    await window.__XLSXReady;
+    if (typeof XLSX === 'undefined') {
+      alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
+      return;
+    }
+    if (!window.__lastResult) {
+      const txt = (document.getElementById('text').value || '').trim();
+      if (!txt) {
+        alert('Cole um texto e clique em Calcular antes de baixar.');
         return;
       }
+      compute();
       if (!window.__lastResult) {
-        const txt = (document.getElementById('text').value || '').trim();
-        if (!txt) {
-          alert('Cole um texto e clique em Calcular antes de baixar.');
-          return;
-        }
-        compute();
-        if (!window.__lastResult) {
-          alert('Não foi possível gerar o resultado.');
-          return;
-        }
+        alert('Não foi possível gerar o resultado.');
+        return;
       }
-
-      const r = window.__lastResult;
-
-      const resultados = [
-        ['Campo', 'Valor'],
-        ['Frases', r.sentences],
-        ['Palavras', r.words],
-        ['Sílabas', r.syllables],
-        ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
-        ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
-        ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
-        ['Classificação', r.classification],
-        ['Gerado em', new Date().toISOString()]
-      ];
-      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
-
-      const texto = document.getElementById('text').value || '';
-      const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
-      XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
-
-      XLSX.writeFile(wb, 'calpes_resultados.xlsx');
-    } catch (err) {
-      console.error(err);
-      alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
     }
-  }
 
+    const r = window.__lastResult;
+
+    const resultados = [
+      ['Campo', 'Valor'],
+      ['Frases', r.sentences],
+      ['Palavras', r.words],
+      ['Sílabas', r.syllables],
+      ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
+      ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
+      ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
+      ['Classificação', r.classification],
+      ['Gerado em', new Date().toISOString()]
+    ];
+    const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
+
+    const texto = document.getElementById('text').value || '';
+    const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
+    XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
+
+    XLSX.writeFile(wb, 'calpes_resultados.xlsx');
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
+  }
+}
+
+    function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+    background:#111827; color:#fff; padding:10px 14px; border-radius:10px;
+    box-shadow:0 6px 20px rgba(0,0,0,.2); font-size:14px; z-index:9999; opacity:0; transition:opacity .2s;
+  `;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{ t.style.opacity = '1'; });
+  setTimeout(()=>{ t.style.opacity = '0'; setTimeout(()=> t.remove(), 200); }, 1500);
+}
   // ===== Listeners quando o DOM estiver pronto =====
   document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('calc')?.addEventListener('click', compute);
@@ -430,12 +445,14 @@
 
     document.getElementById('downloadXlsx')?.addEventListener('click', downloadAsXlsx);
     document.getElementById('copy')?.addEventListener('click', ()=>{
-      const r = window.__lastResult;
-      const text = r
-        ? `Índice de Leiturabilidade de Flesch: ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
-        : 'Sem resultados ainda.';
-      navigator.clipboard.writeText(text);
-    });
+  const r = window.__lastResult;
+  const text = r
+    ? `Índice de Leiturabilidade de Flesch: ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
+    : 'Sem resultados ainda.';
+  navigator.clipboard.writeText(text).then(()=>{
+    showToast('Resumo copiado!');
+  });
+});
 
     document.getElementById('save')?.addEventListener('click', saveCurrent);
     document.getElementById('exportAll')?.addEventListener('click', exportAllXlsx);
@@ -443,6 +460,8 @@
 
     updateSavedInfo();
   });
+
+    
   </script>
 </body>
 </html>

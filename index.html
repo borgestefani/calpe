@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CALPE – Calculadora de Leiturabilidade</title>
+  <title>CALPES – Calculadora de Leiturabilidade</title>
   <meta name="description" content="CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde." />
   <style>
     :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--accent:#22c55e;--text:#e5e7eb;--soft:#1f2937}
@@ -38,10 +38,8 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="title">CALPE <span class="badge">beta</span></div>
-    <div class="subtitle">Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde
-      
-    </div>
+    <div class="title">CALPES <span class="badge">beta</span></div>
+    <div class="subtitle">Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde</div>
 
     <div class="grid">
       <div class="card pad">
@@ -90,49 +88,43 @@
       <h2>Como funciona</h2>
       <p class="small">A contagem automática usa: (1) frases por separadores <span class="mono">[.!?;:]</span>; (2) palavras por tokens alfabéticos (incluindo acentos); (3) sílabas por grupos de vogais do português (<span class="mono">a e i o u á é í ó ú â ê ô ã õ à ü</span>), com ajuste mínimo de 1 sílaba por palavra e pequenos refinamentos para ditongos. Você pode sobrepor com valores manuais.</p>
       <div class="row">
-        <button id="downloadJson" class="secondary">Baixar resultados (.json)</button>
+        <button id="downloadXlsx" class="secondary">Baixar resultados (.xlsx)</button>
         <button id="copy" class="secondary">Copiar resumo</button>
       </div>
     </div>
 
-    <p class="foot" style="margin-top:20px">© 2025 CALPE · Licença MIT · Esta é uma ferramenta educacional. Verifique amostras em textos muito técnicos.</p>
+    <p class="foot" style="margin-top:20px">© 2025 CALPES · Licença MIT · Esta é uma ferramenta educacional. Verifique amostras em textos muito técnicos.</p>
   </div>
 
+  <!-- Biblioteca para gerar Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+
   <script>
-    const VOWELS = /[aeiouáéíóúâêôãõàü]/i;
     const VOWEL_GROUPS = /[aeiouáéíóúâêôãõàü]+/gi;
-    const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ]+)*/g; // palavras com acento e hifen/apóstrofo
+    const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ]+)*/g;
 
     function countSentences(text){
-      const s = (text||"").replace(/\.{3,}/g, "."); // normaliza reticências
+      const s = (text||"").replace(/\.{3,}/g, ".");
       const pieces = s.split(/[.!?;:]+/).map(t=>t.trim()).filter(Boolean);
-      return Math.max(1, pieces.length); // evita zero para não dividir por zero
+      return Math.max(1, pieces.length);
     }
-
     function countWords(text){
       const m = (text||"").match(WORD_RE);
       return m ? m.length : 0;
     }
-
-    // Heurística de sílabas para pt-BR: grupos de vogais ajustados
     function syllablesInWord(w){
       if(!w) return 0;
       const lower = w.toLowerCase();
       const groups = lower.match(VOWEL_GROUPS);
       let syl = groups ? groups.length : 0;
-      // Ajustes simples: 'gue/gui', 'que/qui' contam geralmente 1 núcleo
       if(/g[uü]e|g[uü]i|q[uü]e|q[uü]i/.test(lower)) syl -= 1;
-      // ditongos comuns (ai, ei, oi, ui, au, eu, ou, ão, ãe)
       if(/ai|ei|oi|ui|au|eu|ou|ão|ãe/.test(lower)) syl -= 0.5;
-      syl = Math.round(Math.max(1, syl));
-      return syl;
+      return Math.round(Math.max(1, syl));
     }
-
     function countSyllables(text){
       const words = (text||"").match(WORD_RE) || [];
       return words.reduce((sum,w)=> sum + syllablesInWord(w), 0);
     }
-
     function classify(score){
       if(score >= 75) return "Muito fácil (fundamental)";
       if(score >= 50) return "Fácil (fundamental/médio)";
@@ -149,12 +141,13 @@
       let sentences = Number.isFinite(sManual) ? sManual : countSentences(text);
       let words = Number.isFinite(wManual) ? wManual : countWords(text);
       let syllables = Number.isFinite(yManual) ? yManual : countSyllables(text);
+
       sentences = Math.max(1, sentences);
       words = Math.max(1, words);
       syllables = Math.max(1, syllables);
 
       const wps = words / sentences;
-      const spw = syllables / words;
+      const spw = words ? (syllables / words) : 0;
       const score = 248.835 - 1.015 * wps - 84.6 * spw;
 
       document.getElementById('sentencesOut').textContent = sentences;
@@ -162,10 +155,43 @@
       document.getElementById('syllablesOut').textContent = syllables;
       document.getElementById('wpsOut').textContent = wps.toFixed(2);
       document.getElementById('spwOut').textContent = spw.toFixed(2);
-      document.getElementById('scoreOut').textContent = score.toFixed(1);
+      document.getElementById('scoreOut').textContent = isFinite(score) ? score.toFixed(1) : "–";
       document.getElementById('classOut').textContent = classify(score);
 
       window.__lastResult = { sentences, words, syllables, wps, spw, score, classification: classify(score) };
+    }
+
+    // Exportar como Excel (.xlsx)
+    function downloadAsXlsx() {
+      if (!window.__lastResult) {
+        alert('Calcule primeiro para gerar o arquivo.');
+        return;
+      }
+      const r = window.__lastResult;
+
+      // Aba 1: Resultados
+      const resultados = [
+        ['Campo', 'Valor'],
+        ['Frases', r.sentences],
+        ['Palavras', r.words],
+        ['Sílabas', r.syllables],
+        ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
+        ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
+        ['Índice de Flesch (pt-BR)', Number(r.score).toFixed(1)],
+        ['Classificação', r.classification],
+        ['Gerado em', new Date().toISOString()]
+      ];
+      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
+
+      // Aba 2: Texto (para referência)
+      const texto = document.getElementById('text').value || '';
+      const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
+      XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
+
+      XLSX.writeFile(wb, 'calpes_resultados.xlsx');
     }
 
     document.getElementById('calc').addEventListener('click', compute);
@@ -176,22 +202,16 @@
       });
       window.__lastResult = null;
     });
-
-    document.getElementById('downloadJson').addEventListener('click', ()=>{
-      const data = window.__lastResult || {};
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'calpe_resultados.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
+    document.getElementById('downloadXlsx').addEventListener('click', downloadAsXlsx);
 
     document.getElementById('copy').addEventListener('click', ()=>{
       const r = window.__lastResult;
-      const text = r ? `Índice de Flesch (pt-BR): ${r.score.toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${r.wps.toFixed(2)} palavras/frase; ${r.spw.toFixed(2)} sílabas/palavra` : 'Sem resultados ainda.';
+      const text = r
+        ? `Índice de Flesch (pt-BR): ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
+        : 'Sem resultados ainda.';
       navigator.clipboard.writeText(text);
     });
   </script>
 </body>
 </html>
+

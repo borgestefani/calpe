@@ -9,11 +9,11 @@
   /* ===== Paleta (light) ===== */
   :root{
     --bg-grad: linear-gradient(to bottom, #ffffff, #e5e7eb);
-    --text: #111827;           /* texto principal */
-    --muted: #374151;          /* legendas/dicas */
-    --card: #ffffff;           /* fundo dos cards */
+    --text: #111827;
+    --muted: #374151;
+    --card: #ffffff;
     --border: rgba(17,24,39,.12);
-    --accent: #16a34a;         /* botão principal */
+    --accent: #16a34a;
   }
 
   *{box-sizing:border-box}
@@ -30,10 +30,18 @@
   .title{font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.02em}
   .subtitle{color:var(--muted);margin-top:6px}
 
-  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:20px}
-  @media (max-width: 900px){.grid{grid-template-columns:1fr}}
+  /* GRID principal: 2 colunas (Texto | Resultados+Exportação) */
+  .grid{
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:16px;
+    margin-top:20px
+  }
+  @media (max-width: 900px){
+    .grid{grid-template-columns:1fr}
+  }
 
-  /* Cards (modo claro) */
+  /* Cards */
   .card{
     background: var(--card);
     border: 1px solid var(--border);
@@ -41,16 +49,14 @@
     box-shadow: 0 8px 24px rgba(0,0,0,.08);
   }
   .card h2{font-size:18px;margin:0 0 12px}
-
   .pad{padding:18px}
 
-  /* Área de texto e inputs — CINZA CLARO + texto escuro */
+  /* Área de texto e inputs — cinza claro */
   textarea{
     width:100%;min-height:320px;
-    background:#f3f4f6;
-    color:#111827;
-    border:1px solid #d1d5db;
-    border-radius:12px;padding:14px;resize:vertical;font-size:15px;line-height:1.5
+    background:#f3f4f6;color:#111827;
+    border:1px solid #d1d5db;border-radius:12px;
+    padding:14px;resize:vertical;font-size:15px;line-height:1.5
   }
 
   /* inputs lado a lado (3 colunas) */
@@ -59,8 +65,7 @@
 
   input[type="number"]{
     width:100%;padding:10px;border-radius:10px;
-    border:1px solid #d1d5db;
-    background:#f3f4f6;color:#111827
+    border:1px solid #d1d5db;background:#f3f4f6;color:#111827
   }
 
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
@@ -90,8 +95,15 @@
   .foot{font-size:12px;color:var(--muted)}
   .small{font-size:13px}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-
   .link{color:#2563eb;text-decoration:none}
+
+  /* Social card */
+  .social-row{display:flex;justify-content:center;gap:40px;margin-top:10px}
+  .social-item{display:flex;flex-direction:column;align-items:center;text-decoration:none}
+  .icon-box{width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center}
+  .icon-box img{width:48px;height:48px;object-fit:contain;display:block}
+  .social-item svg{width:48px;height:48px;display:block}
+  .social-label{font-size:13px;margin-top:6px;color:var(--muted)}
   </style>
 
   <!-- Carrega SheetJS com 3 CDNs + timeout; expõe Promise global __XLSXReady -->
@@ -124,114 +136,134 @@
     <div class="title">CALPES <span class="badge">beta</span></div>
     <div class="subtitle">Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde</div>
 
+    <!-- === GRID PRINCIPAL === -->
     <div class="grid">
-      <div class="card pad">
-        <h2>Texto</h2>
-        <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
-        <div class="row help">
-          <button id="calc">Calcular</button>
-          <button class="secondary" id="clear">Limpar</button>
-          <span class="muted small">Dica: você pode também informar contagens manualmente abaixo (sobrepõe a detecção automática).</span>
-        </div>
 
-        <div class="inputs" style="margin-top:12px">
-          <div>
-            <label class="small muted">Frases</label>
-            <input id="sentencesManual" type="number" min="0" placeholder="auto" />
+      <!-- COLUNA ESQUERDA: TEXTO -->
+      <div>
+        <div class="card pad">
+          <h2>Texto</h2>
+          <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
+          <div class="row help">
+            <button id="calc">Calcular</button>
+            <button class="secondary" id="clear">Limpar</button>
+            <span class="muted small">Dica: você pode também informar contagens manualmente abaixo (sobrepõe a detecção automática).</span>
           </div>
-          <div>
-            <label class="small muted">Palavras</label>
-            <input id="wordsManual" type="number" min="0" placeholder="auto" />
+
+          <div class="inputs" style="margin-top:12px">
+            <div>
+              <label class="small muted">Frases</label>
+              <input id="sentencesManual" type="number" min="0" placeholder="auto" />
+            </div>
+            <div>
+              <label class="small muted">Palavras</label>
+              <input id="wordsManual" type="number" min="0" placeholder="auto" />
+            </div>
+            <div>
+              <label class="small muted">Sílabas</label>
+              <input id="syllablesManual" type="number" min="0" placeholder="auto" />
+            </div>
           </div>
-          <div>
-            <label class="small muted">Sílabas</label>
-            <input id="syllablesManual" type="number" min="0" placeholder="auto" />
-          </div>
-        </div>
 
-        
-      <div class="card pad">
-        <h2>Resultados</h2>
-        <div class="stat"><span class="muted">Frases</span><strong id="sentencesOut">–</strong></div>
-        <div class="stat"><span class="muted">Palavras</span><strong id="wordsOut">–</strong></div>
-        <div class="stat"><span class="muted">Sílabas</span><strong id="syllablesOut">–</strong></div>
-        <div class="stat"><span class="muted">Média de sílabas por palavra</span><strong id="spwOut">–</strong></div>
-        <div class="stat"><span class="muted">Média de palavras por frase</span><strong id="wpsOut">–</strong></div>
-
-        <div style="margin:16px 0;border-top:1px solid var(--border)"></div>
-
-        <div class="muted small">Índice de Leiturabilidade de Flesch (Português)</div>
-        <div class="score" id="scoreOut">–</div>
-        <div class="badge" id="classOut">–</div>
-
-        <div class="foot" style="margin-top:10px">
-          <div style="margin-bottom:6px;">Interpretação sugerida:</div>
-          <table style="width:100%; border-collapse: collapse; font-size:13px; text-align:left;">
-            <tr style="background:rgba(34,197,94,0.08);">
-              <td style="padding:6px;">&gt;75–100</td>
-              <td style="padding:6px;">Muito fácil (nível fundamental, 1º ao 5º ano)</td>
-            </tr>
-            <tr style="background:rgba(132,204,22,0.08);">
-              <td style="padding:6px;">&gt;50–75</td>
-              <td style="padding:6px;">Fácil (nível fundamental, 6º ao 9º ano)</td>
-            </tr>
-            <tr style="background:rgba(251,191,36,0.08);">
-              <td style="padding:6px;">&gt;25–50</td>
-              <td style="padding:6px;">Difícil (nível médio)</td>
-            </tr>
-            <tr style="background:rgba(239,68,68,0.08);">
-              <td style="padding:6px;">0–25</td>
-              <td style="padding:6px;">Muito difícil (nível superior)</td>
-            </tr>
-          </table>
+          <p class="foot" style="margin-top:10px">
+            O cálculo de sílabas é feito de forma aproximada, considerando as vogais. Para textos técnicos, prefira validar com amostras manuais.
+          </p>
         </div>
       </div>
-    </div>
 
-    <!-- Card de ações/armazenamento -->
-<div class="card pad" style="margin-top:10px">
-  <div class="row" style="align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
-    <button id="save">Salvar contagem</button>
-    <button id="exportAll" class="secondary">Exportar análises salvas</button>
-    <button id="downloadXlsx" class="secondary">Baixar resultado atual</button>
-    <button id="copy" class="secondary">Copiar resultado atual</button>
-    <button id="clearAll" class="secondary">Zerar armazenamento</button>
-  </div>
+      <!-- COLUNA DIREITA: RESULTADOS + AÇÕES -->
+      <div>
 
-  <!-- nova linha centralizada para os contadores -->
-  <div style="text-align:center; margin-top:8px;">
-    <span class="muted small" id="savedInfo">0 salvas</span> · 
-    <span class="muted small" id="analyzedInfo">0 analisados</span>
-  </div>
-</div>
+        <!-- Resultados -->
+        <div class="card pad">
+          <h2>Resultados</h2>
+          <div class="stat"><span class="muted">Frases</span><strong id="sentencesOut">–</strong></div>
+          <div class="stat"><span class="muted">Palavras</span><strong id="wordsOut">–</strong></div>
+          <div class="stat"><span class="muted">Sílabas</span><strong id="syllablesOut">–</strong></div>
+          <div class="stat"><span class="muted">Média de sílabas por palavra</span><strong id="spwOut">–</strong></div>
+          <div class="stat"><span class="muted">Média de palavras por frase</span><strong id="wpsOut">–</strong></div>
+
+          <div style="margin:16px 0;border-top:1px solid var(--border)"></div>
+
+          <div class="muted small">Índice de Leiturabilidade de Flesch (Português)</div>
+          <div class="score" id="scoreOut">–</div>
+          <div class="badge" id="classOut">–</div>
+
+          <div class="foot" style="margin-top:10px">
+            <div style="margin-bottom:6px;">Interpretação sugerida:</div>
+            <table style="width:100%; border-collapse: collapse; font-size:13px; text-align:left;">
+              <tr style="background:rgba(34,197,94,0.08);">
+                <td style="padding:6px;">&gt;75–100</td>
+                <td style="padding:6px;">Muito fácil (nível fundamental, 1º ao 5º ano)</td>
+              </tr>
+              <tr style="background:rgba(132,204,22,0.08);">
+                <td style="padding:6px;">&gt;50–75</td>
+                <td style="padding:6px;">Fácil (nível fundamental, 6º ao 9º ano)</td>
+              </tr>
+              <tr style="background:rgba(251,191,36,0.08);">
+                <td style="padding:6px;">&gt;25–50</td>
+                <td style="padding:6px;">Difícil (nível médio)</td>
+              </tr>
+              <tr style="background:rgba(239,68,68,0.08);">
+                <td style="padding:6px;">0–25</td>
+                <td style="padding:6px;">Muito difícil (nível superior)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ações / Exportação -->
+        <div class="card pad" style="margin-top:10px">
+          <div class="row" style="align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
+            <button id="save">Salvar contagem</button>
+            <button id="exportAll" class="secondary">Exportar análises salvas</button>
+            <button id="downloadXlsx" class="secondary">Baixar resultado atual</button>
+            <button id="copy" class="secondary">Copiar resultado atual</button>
+            <button id="clearAll" class="secondary">Zerar armazenamento</button>
+          </div>
+          <div style="text-align:center; margin-top:8px;">
+            <span class="muted small" id="savedInfo">0 salvas</span> ·
+            <span class="muted small" id="analyzedInfo">0 analisados</span>
+          </div>
+        </div>
+
+      </div><!-- /coluna direita -->
+
+    </div><!-- /grid -->
 
     <!-- Card social -->
-<div class="card pad" style="margin-top:10px; text-align:center;">
-    <p class="small muted">Saiba mais sobre meu trabalho:</p>
+    <div class="card pad" style="margin-top:10px; text-align:center;">
+      <h2>Conecte-se</h2>
+      <p class="small muted">Saiba mais sobre meu trabalho:</p>
 
-  <div class="social-row">
-    <!-- Lattes -->
-    <a class="social-item" href="https://lattes.cnpq.br/6753755414872565" target="_blank" rel="noopener">
-      <span class="icon-box">
-        <img src="https://lh5.googleusercontent.com/proxy/4d6-dVOcMrp7HoU9t-bhgfgoqSLWbcgosoSMPp956YzTQzTfRfFDiUXR3hssFIJDTEe0ozmcq4wv6E7AiZn7-kNEwVvhboggb9gHgMMh-webTRvzg8ndDb7Sffpa9N2N4ThiQboH11-KkcPt_C4Qj0ZXxeEREqmIp7k"
-             alt="Lattes"/>
-      </span>
-      <span class="social-label">Lattes</span>
-    </a>
+      <div class="social-row">
+        <!-- Lattes -->
+        <a class="social-item" href="https://lattes.cnpq.br/6753755414872565" target="_blank" rel="noopener">
+          <span class="icon-box">
+            <img src="https://lh5.googleusercontent.com/proxy/4d6-dVOcMrp7HoU9t-bhgfgoqSLWbcgosoSMPp956YzTQzTfRfFDiUXR3hssFIJDTEe0ozmcq4wv6E7AiZn7-kNEwVvhboggb9gHgMMh-webTRvzg8ndDb7Sffpa9N2N4ThiQboH11-KkcPt_C4Qj0ZXxeEREqmIp7k"
+                 alt="Lattes"/>
+          </span>
+          <span class="social-label">Lattes</span>
+        </a>
 
-    <!-- LinkedIn -->
-    <a class="social-item" href="https://www.linkedin.com/in/stefaniboorges/" target="_blank" rel="noopener">
-      <span class="icon-box">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="LinkedIn">
-          <path fill="#0a66c2"
-            d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5V9h3v10zM6.5 7.6A1.75 1.75 0 1 1 6.5 4.1a1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V19h-3V9h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59V19z"/>
-        </svg>
-      </span>
-      <span class="social-label">LinkedIn</span>
-    </a>
-  </div>
-</div>
+        <!-- LinkedIn -->
+        <a class="social-item" href="https://www.linkedin.com/in/stefaniboorges/" target="_blank" rel="noopener">
+          <span class="icon-box">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="LinkedIn">
+              <path fill="#0a66c2"
+                d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5V9h3v10zM6.5 7.6A1.75 1.75 0 1 1 6.5 4.1a1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V19h-3V9h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59V19z"/>
+            </svg>
+          </span>
+          <span class="social-label">LinkedIn</span>
+        </a>
+      </div>
 
+      <p class="foot" style="margin-top:15px">
+        © 2025 CALPES · Stéfani Borges · Licença MIT · Esta é uma ferramenta educacional.
+      </p>
+    </div>
+
+  </div><!-- /wrap -->
 
   <!-- JS principal -->
   <script>
@@ -390,56 +422,46 @@
     }
   }
 
-  // ===== Exportar resultado atual (somente resultados, UTF-8) =====
-async function downloadAsXlsx() {
-  try {
-    await window.__XLSXReady;
-    if (typeof XLSX === 'undefined') {
-      alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
-      return;
-    }
-    if (!window.__lastResult) {
-      const txt = (document.getElementById('text').value || '').trim();
-      if (!txt) {
-        alert('Cole um texto e clique em Calcular antes de baixar.');
+  // Exportar resultado atual (somente resultados, UTF-8)
+  async function downloadAsXlsx() {
+    try {
+      await window.__XLSXReady;
+      if (typeof XLSX === 'undefined') {
+        alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
         return;
       }
-      compute();
       if (!window.__lastResult) {
-        alert('Não foi possível gerar o resultado.');
-        return;
+        const txt = (document.getElementById('text').value || '').trim();
+        if (!txt) { alert('Cole um texto e clique em Calcular antes de baixar.'); return; }
+        compute();
+        if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
       }
+
+      const r = window.__lastResult;
+      const resultados = [
+        ['Campo', 'Valor'],
+        ['Frases', r.sentences],
+        ['Palavras', r.words],
+        ['Sílabas', r.syllables],
+        ['Palavras por frase', Number(r.wps).toFixed(2)],
+        ['Sílabas por palavra', Number(r.spw).toFixed(2)],
+        ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
+        ['Classificação', r.classification],
+        ['Gerado em', new Date().toLocaleString('pt-BR')]
+      ];
+
+      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
+      XLSX.writeFile(wb, 'calpes_resultados.xlsx', { compression: true });
+    } catch (err) {
+      console.error(err);
+      alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
     }
-
-    const r = window.__lastResult;
-
-    const resultados = [
-      ['Campo', 'Valor'],
-      ['Frases', r.sentences],
-      ['Palavras', r.words],
-      ['Sílabas', r.syllables],
-      ['Palavras por frase', Number(r.wps).toFixed(2)],
-      ['Sílabas por palavra', Number(r.spw).toFixed(2)],
-      ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
-      ['Classificação', r.classification],
-      ['Gerado em', new Date().toLocaleString('pt-BR')]
-    ];
-
-    // cria a planilha apenas com os resultados
-    const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
-
-    XLSX.writeFile(wb, 'calpes_resultados.xlsx', { compression: true });
-  } catch (err) {
-    console.error(err);
-    alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
   }
-}
 
   /* ===== Listeners ===== */
-  document.addEventListener('DOMContentLoaded', async function(){
+  document.addEventListener('DOMContentLoaded', function(){
     loadState();
     updateSavedInfo();
 
@@ -463,9 +485,9 @@ async function downloadAsXlsx() {
     document.getElementById('save')?.addEventListener('click', saveCurrent);
     document.getElementById('exportAll')?.addEventListener('click', exportAllXlsx);
     document.getElementById('downloadXlsx')?.addEventListener('click', downloadAsXlsx);
-
     document.getElementById('clearAll')?.addEventListener('click', clearSaved);
   });
   </script>
 </body>
 </html>
+

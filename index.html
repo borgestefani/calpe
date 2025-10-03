@@ -336,12 +336,22 @@
     persistState();
   }
   function clearSaved() {
-    if (!saved.length) { alert('O armazenamento já está vazio.'); return; }
-    if (!confirm('Tem certeza que deseja zerar o armazenamento?')) return;
-    saved.length = 0;
-    updateSavedInfo();
-    persistState();
+  if (!saved.length && analyzed === 0) { 
+    alert('O armazenamento já está vazio.'); 
+    return; 
   }
+  if (!confirm('Tem certeza que deseja zerar o armazenamento?')) return;
+
+  // zera salvos
+  saved.length = 0;
+
+  // zera analisados também
+  analyzed = 0;
+
+  updateSavedInfo();
+  persistState();
+}
+
 
   function showToast(msg){
     const t = document.createElement('div');

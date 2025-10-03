@@ -4,7 +4,7 @@ A **CALPES (Calculadora de Leiturabilidade em Português para Materiais Educativ
 
 Ela foi criada com foco na análise de materiais educativos em saúde, mas pode ser utilizada em diferentes contextos para verificar a complexidade de leitura de um texto.
 
-🌐 Versão online: [Acesse aqui](https://borgestefani.github.io/calpe/)  
+🌐 Versão online: [Acesse aqui](https://borgestefani.github.io/calpes/)  
 
 ---
 

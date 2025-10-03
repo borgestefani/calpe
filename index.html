@@ -94,38 +94,30 @@
   .link{color:#2563eb;text-decoration:none}
   </style>
 
-  <!-- Carrega SheetJS com fallback e timeout -->
-<script>
-  // Promise global indicando quando o XLSX está pronto
-  window.__XLSXReady = new Promise((resolve, reject) => {
-    let settled = false;
-    function done() {
-      if (!settled) { settled = true; console.log("SheetJS carregado."); resolve(); }
-    }
-    function fail(msg) {
-      if (!settled) { settled = true; console.warn(msg); reject(new Error(msg)); }
-    }
+  <!-- Carrega SheetJS com 3 CDNs + timeout; expõe Promise global __XLSXReady -->
+  <script>
+    window.__XLSXReady = new Promise((resolve, reject) => {
+      let settled = false;
+      function done(){ if(!settled){ settled=true; console.log("SheetJS carregado."); resolve(); } }
+      function fail(msg){ if(!settled){ settled=true; console.warn(msg); reject(new Error(msg)); } }
 
-    // timeout de segurança (10s)
-    const t = setTimeout(() => fail("Timeout ao carregar SheetJS."), 10000);
+      const timeout = setTimeout(() => fail("Timeout ao carregar SheetJS."), 12000);
+      const cdns = [
+        "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js",
+        "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.19.3/xlsx.full.min.js"
+      ];
 
-    // tenta jsDelivr
-    const s = document.createElement('script');
-    s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js";
-    s.onload = () => { clearTimeout(t); done(); };
-    s.onerror = () => {
-      // fallback: unpkg
-      console.warn("Falha no jsDelivr; tentando unpkg…");
-      const f = document.createElement('script');
-      f.src = "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js";
-      f.onload = () => { clearTimeout(t); done(); };
-      f.onerror = () => { clearTimeout(t); fail("Falha ao carregar SheetJS (ambas as CDNs)."); };
-      document.head.appendChild(f);
-    };
-    document.head.appendChild(s);
-  });
-</script>
-
+      (function tryNext(i){
+        if (i >= cdns.length) { clearTimeout(timeout); fail("Falha ao carregar SheetJS (todas as CDNs)."); return; }
+        const s = document.createElement('script');
+        s.src = cdns[i];
+        s.onload = () => { clearTimeout(timeout); done(); };
+        s.onerror = () => { console.warn("Falha em:", cdns[i], " — tentando a próxima…"); tryNext(i+1); };
+        document.head.appendChild(s);
+      })(0);
+    });
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -239,10 +231,31 @@
 
   <!-- JS principal -->
   <script>
-  // ===== Regex e utilidades =====
+  /* ===== Regex e utilidades ===== */
   const VOWEL_GROUPS = /[aeiouáéíóúâêôãõàü]+/gi;
   const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ]+)*/g;
 
+  /* ===== Persistência ===== */
+  const STORAGE_KEYS = { saved: 'calpes_saved', analyzed: 'calpes_analyzed' };
+  let saved = [];
+  let analyzedCount = 0;
+
+  function loadState(){
+    try { const a = localStorage.getItem(STORAGE_KEYS.analyzed); if (a) analyzedCount = Number(a)||0; } catch(e){}
+    try { const s = localStorage.getItem(STORAGE_KEYS.saved); if (s) { const arr = JSON.parse(s); if (Array.isArray(arr)) saved = arr; } } catch(e){}
+  }
+  function persistState(){
+    try { localStorage.setItem(STORAGE_KEYS.analyzed, String(analyzedCount)); } catch(e){}
+    try { localStorage.setItem(STORAGE_KEYS.saved, JSON.stringify(saved)); } catch(e){}
+  }
+  function updateSavedInfo() {
+    const s = document.getElementById('savedInfo');
+    const a = document.getElementById('analyzedInfo');
+    if (s) s.textContent = `${saved.length} salvas`;
+    if (a) a.textContent = `${analyzedCount} analisados`;
+  }
+
+  /* ===== Helpers ===== */
   function countSentences(text){
     const s = (text||"").replace(/\.{3,}/g, ".");
     const pieces = s.split(/[.!?;:]+/).map(t=>t.trim()).filter(Boolean);
@@ -272,11 +285,7 @@
     return "Muito difícil (nível superior)";
   }
 
-  // ===== Estado (armazenamento em memória) =====
-  const saved = [];
-  let analyzedCount = 0;
-
-  // ===== Cálculo principal =====
+  /* ===== Cálculo principal ===== */
   function compute(){
     const text = document.getElementById('text').value;
     const sManual = parseInt(document.getElementById('sentencesManual').value,10);
@@ -305,150 +314,140 @@
 
     window.__lastResult = { sentences, words, syllables, wps, spw, score, classification: classify(score) };
 
-    // contador de análises
+    // só conta analisados; não salva automaticamente
     analyzedCount += 1;
     updateSavedInfo();
     persistState();
   }
 
-  // ===== Armazenamento & Exportação múltipla =====
-  function updateSavedInfo() {
-    const s = document.getElementById('savedInfo');
-    const a = document.getElementById('analyzedInfo');
-    if (s) s.textContent = `${saved.length} salvas`;
-    if (a) a.textContent = `${analyzedCount} analisados`;
-  }
-
+  /* ===== Armazenamento explícito ===== */
   function saveCurrent() {
-    if (!window.__lastResult) {
-      alert('Calcule primeiro para salvar a contagem.');
-      return;
-    }
+    if (!window.__lastResult) { alert('Calcule primeiro para salvar a contagem.'); return; }
     const txt = (document.getElementById('text').value || '').trim();
     const snippet = txt.slice(0, 120).replace(/\s+/g, ' ');
-
     const r = window.__lastResult;
-    const item = {
-      sentences: r.sentences,
-      words: r.words,
-      syllables: r.syllables,
-      wps: Number(r.wps),
-      spw: Number(r.spw),
-      score: Number(r.score),
-      classification: r.classification,
-      snippet,
-      createdAt: new Date().toISOString()
-    };
-
-    saved.push(item);       // sem limite fixo; mude para if(saved.length>=N) shift() se quiser limitar
+    saved.push({
+      sentences:r.sentences, words:r.words, syllables:r.syllables,
+      wps:Number(r.wps), spw:Number(r.spw), score:Number(r.score),
+      classification:r.classification, snippet, createdAt:new Date().toISOString()
+    });
     updateSavedInfo();
+    persistState();
   }
-
   function clearSaved() {
     if (!saved.length) { alert('O armazenamento já está vazio.'); return; }
+    if (!confirm('Tem certeza que deseja zerar o armazenamento?')) return;
     saved.length = 0;
     updateSavedInfo();
+    persistState();
   }
 
-  async function exportAllXlsx() {
-  await window.__XLSXReady;
-  if (typeof XLSX === 'undefined') {
-    alert('Biblioteca do Excel não carregou. Recarregue a página.');
-    return;
+  /* ===== Toast ===== */
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = `
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+      background:#111827; color:#fff; padding:10px 14px; border-radius:10px;
+      box-shadow:0 6px 20px rgba(0,0,0,.2); font-size:14px; z-index:9999; opacity:0; transition:opacity .2s;
+    `;
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity = '1'; });
+    setTimeout(()=>{ t.style.opacity = '0'; setTimeout(()=> t.remove(), 200); }, 1500);
   }
-  if (saved.length === 0) {
-    alert('Não há contagens salvas para exportar.');
-    return;
-  }
-  const header = ['#', 'Data/Hora', 'Frases', 'Palavras', 'Sílabas', 'wps', 'spw',
-                  'Índice de Leiturabilidade de Flesch', 'Classificação', 'Trecho do texto'];
-  const rows = [header];
 
-  saved.forEach((r, i) => {
-    rows.push([
-      i + 1,
-      r.createdAt,
-      r.sentences,
-      r.words,
-      r.syllables,
-      r.wps.toFixed(2),
-      r.spw.toFixed(2),
-      r.score.toFixed(1),
-      r.classification,
-      r.snippet
-    ]);
-  });
+  /* ===== Exportações (XLSX com fallback CSV) ===== */
+  async function exportAllXlsx(){
+    try{
+      showToast('Preparando exportação…');
+      await window.__XLSXReady;
+      if (typeof XLSX === 'undefined') throw new Error('XLSX indisponível');
+      if (saved.length === 0) { alert('Não há contagens salvas para exportar.'); return; }
 
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Todas as contagens');
-  XLSX.writeFile(wb, 'calpes_todas_as_contagens.xlsx');
-}
+      const header = ['#','Data/Hora','Frases','Palavras','Sílabas','wps','spw','Índice de Leiturabilidade de Flesch','Classificação','Trecho do texto'];
+      const rows = [header];
+      saved.forEach((r,i)=> rows.push([i+1,r.createdAt,r.sentences,r.words,r.syllables,r.wps.toFixed(2),r.spw.toFixed(2),r.score.toFixed(1),r.classification,r.snippet]));
 
-  // ===== Exportar resultado atual =====
-  async function downloadAsXlsx() {
-  try {
-    await window.__XLSXReady;
-    if (typeof XLSX === 'undefined') {
-      alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
-      return;
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Todas as contagens');
+      XLSX.writeFile(wb, 'calpes_todas_as_contagens.xlsx');
+    }catch(e){
+      console.warn('XLSX indisponível, usando CSV.', e);
+      if (saved.length === 0) { alert('Não há contagens salvas para exportar.'); return; }
+      const header = ['#','Data/Hora','Frases','Palavras','Sílabas','wps','spw','Indice_Flesch','Classificação','Trecho'];
+      const lines = [header.join(';')];
+      saved.forEach((r,i)=>{
+        const row = [i+1,r.createdAt,r.sentences,r.words,r.syllables,r.wps.toFixed(2),r.spw.toFixed(2),r.score.toFixed(1),r.classification,('"'+(r.snippet||'').replace(/"/g,'""')+'"')];
+        lines.push(row.join(';'));
+      });
+      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'calpes_todas_as_contagens.csv'; a.click(); URL.revokeObjectURL(a.href);
     }
-    if (!window.__lastResult) {
-      const txt = (document.getElementById('text').value || '').trim();
-      if (!txt) {
-        alert('Cole um texto e clique em Calcular antes de baixar.');
-        return;
-      }
-      compute();
+  }
+
+  async function downloadAsXlsx(){
+    try{
+      showToast('Preparando exportação…');
+      await window.__XLSXReady;
+      if (typeof XLSX === 'undefined') throw new Error('XLSX indisponível');
+
       if (!window.__lastResult) {
-        alert('Não foi possível gerar o resultado.');
-        return;
+        const txt = (document.getElementById('text').value || '').trim();
+        if (!txt) { alert('Cole um texto e clique em Calcular antes de baixar.'); return; }
+        const prev = analyzedCount; compute(); analyzedCount = prev; updateSavedInfo(); persistState();
+        if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
       }
+
+      const r = window.__lastResult;
+      const resultados = [
+        ['Campo','Valor'],
+        ['Frases', r.sentences],
+        ['Palavras', r.words],
+        ['Sílabas', r.syllables],
+        ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
+        ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
+        ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
+        ['Classificação', r.classification],
+        ['Gerado em', new Date().toISOString()]
+      ];
+      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
+
+      const texto = document.getElementById('text').value || '';
+      const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
+      XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
+      XLSX.writeFile(wb, 'calpes_resultados.xlsx');
+    }catch(e){
+      console.warn('XLSX indisponível, usando CSV.', e);
+      const r = window.__lastResult;
+      if (!r) { alert('Calcule primeiro.'); return; }
+      const lines = [
+        'Campo;Valor',
+        `Frases;${r.sentences}`,
+        `Palavras;${r.words}`,
+        `Sílabas;${r.syllables}`,
+        `wps;${Number(r.wps).toFixed(2)}`,
+        `spw;${Number(r.spw).toFixed(2)}`,
+        `Indice_Flesch;${Number(r.score).toFixed(1)}`,
+        `Classificação;${r.classification}`,
+        '',
+        'Texto avaliado;'
+      ];
+      const texto = (document.getElementById('text').value||'').replace(/\r?\n/g,' ');
+      lines.push(`"${texto.replace(/"/g,'""')}"`);
+      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'calpes_resultados.csv'; a.click(); URL.revokeObjectURL(a.href);
     }
-
-    const r = window.__lastResult;
-
-    const resultados = [
-      ['Campo', 'Valor'],
-      ['Frases', r.sentences],
-      ['Palavras', r.words],
-      ['Sílabas', r.syllables],
-      ['Palavras por frase (wps)', Number(r.wps).toFixed(2)],
-      ['Sílabas por palavra (spw)', Number(r.spw).toFixed(2)],
-      ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
-      ['Classificação', r.classification],
-      ['Gerado em', new Date().toISOString()]
-    ];
-    const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
-
-    const texto = document.getElementById('text').value || '';
-    const wsTexto = XLSX.utils.aoa_to_sheet([['Texto avaliado'], [texto]]);
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
-    XLSX.utils.book_append_sheet(wb, wsTexto, 'Texto');
-
-    XLSX.writeFile(wb, 'calpes_resultados.xlsx');
-  } catch (err) {
-    console.error(err);
-    alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
   }
-}
 
-    function showToast(msg){
-  const t = document.createElement('div');
-  t.textContent = msg;
-  t.style.cssText = `
-    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
-    background:#111827; color:#fff; padding:10px 14px; border-radius:10px;
-    box-shadow:0 6px 20px rgba(0,0,0,.2); font-size:14px; z-index:9999; opacity:0; transition:opacity .2s;
-  `;
-  document.body.appendChild(t);
-  requestAnimationFrame(()=>{ t.style.opacity = '1'; });
-  setTimeout(()=>{ t.style.opacity = '0'; setTimeout(()=> t.remove(), 200); }, 1500);
-}
-  // ===== Listeners quando o DOM estiver pronto =====
-  document.addEventListener('DOMContentLoaded', function(){
+  /* ===== Listeners ===== */
+  document.addEventListener('DOMContentLoaded', async function(){
+    loadState();
+    updateSavedInfo();
+
     document.getElementById('calc')?.addEventListener('click', compute);
     document.getElementById('clear')?.addEventListener('click', ()=>{
       document.getElementById('text').value = '';
@@ -458,28 +457,20 @@
       window.__lastResult = null;
     });
 
-    document.getElementById('downloadXlsx')?.addEventListener('click', downloadAsXlsx);
     document.getElementById('copy')?.addEventListener('click', ()=>{
-  const r = window.__lastResult;
-  const text = r
-    ? `Índice de Leiturabilidade de Flesch: ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
-    : 'Sem resultados ainda.';
-  navigator.clipboard.writeText(text).then(()=>{
-    showToast('Resumo copiado!');
-  });
-});
+      const r = window.__lastResult;
+      const text = r
+        ? `Índice de Leiturabilidade de Flesch: ${Number(r.score).toFixed(1)} — ${r.classification}\nFrases: ${r.sentences} | Palavras: ${r.words} | Sílabas: ${r.syllables}\nMédias: ${Number(r.wps).toFixed(2)} palavras/frase; ${Number(r.spw).toFixed(2)} sílabas/palavra`
+        : 'Sem resultados ainda.';
+      navigator.clipboard.writeText(text).then(()=> showToast('Resumo copiado!'));
+    });
 
     document.getElementById('save')?.addEventListener('click', saveCurrent);
     document.getElementById('exportAll')?.addEventListener('click', exportAllXlsx);
+    document.getElementById('downloadXlsx')?.addEventListener('click', downloadAsXlsx);
+
     document.getElementById('clearAll')?.addEventListener('click', clearSaved);
-
-    updateSavedInfo();
   });
-
-    
   </script>
 </body>
 </html>
-
-
-

@@ -130,7 +130,7 @@
       <div>
         <div class="card pad">
           <h2>Texto</h2>
-          <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
+          <textarea id="text" placeholder="Insira o texto para avaliação aqui..."></textarea>
           <div class="row help">
             <button id="calc">Calcular</button>
             <button class="secondary" id="clear">Limpar</button>
@@ -401,7 +401,7 @@
       if (typeof XLSX === 'undefined') { alert('Biblioteca do Excel não carregou.'); return; }
       if (!window.__lastResult) {
         const txt = (document.getElementById('text').value || '').trim();
-        if (!txt) { alert('Cole um texto e clique em Calcular antes de baixar.'); return; }
+        if (!txt) { alert('Insira o texto e clique em Calcular antes de baixar.'); return; }
         compute();
         if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
       }

@@ -6,7 +6,6 @@
   <title>CALPES – Calculadora de Leiturabilidade</title>
   <meta name="description" content="CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde." />
   <style>
-  /* ===== Paleta (light) ===== */
   :root{
     --bg-grad: linear-gradient(to bottom, #ffffff, #e5e7eb);
     --text: #111827;
@@ -15,33 +14,25 @@
     --border: rgba(17,24,39,.12);
     --accent: #16a34a;
   }
-
   *{box-sizing:border-box}
-
   body{
-    margin:0;
-    background: var(--bg-grad);
+    margin:0; background: var(--bg-grad);
     font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
     color: var(--text);
   }
-
   .wrap{max-width:1000px;margin:32px auto;padding:24px}
-
   .title{font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.02em}
   .subtitle{color:var(--muted);margin-top:6px}
 
-  /* GRID principal: 2 colunas (Texto | Resultados+Exportação) */
+  /* === GRID principal: 2 colunas iguais (Texto | Resultados) === */
   .grid{
     display:grid;
-    grid-template-columns:1.2fr .8fr;
+    grid-template-columns: 1fr 1fr;  /* <- iguais */
     gap:16px;
-    margin-top:20px
+    margin-top:20px;
   }
-  @media (max-width: 900px){
-    .grid{grid-template-columns:1fr}
-  }
+  @media (max-width: 900px){ .grid{ grid-template-columns:1fr } }
 
-  /* Cards */
   .card{
     background: var(--card);
     border: 1px solid var(--border);
@@ -51,44 +42,37 @@
   .card h2{font-size:18px;margin:0 0 12px}
   .pad{padding:18px}
 
-  /* Área de texto e inputs — cinza claro */
   textarea{
-    width:100%;min-height:320px;
-    background:#f3f4f6;color:#111827;
-    border:1px solid #d1d5db;border-radius:12px;
-    padding:14px;resize:vertical;font-size:15px;line-height:1.5
+    width:100%; min-height:320px;
+    background:#f3f4f6; color:#111827;
+    border:1px solid #d1d5db; border-radius:12px;
+    padding:14px; resize:vertical; font-size:15px; line-height:1.5;
   }
 
-  /* inputs lado a lado (3 colunas) */
   .inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   @media (max-width: 600px){.inputs{grid-template-columns:1fr 1fr}}
 
   input[type="number"]{
-    width:100%;padding:10px;border-radius:10px;
-    border:1px solid #d1d5db;background:#f3f4f6;color:#111827
+    width:100%; padding:10px; border-radius:10px;
+    border:1px solid #d1d5db; background:#f3f4f6; color:#111827;
   }
 
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 
-  /* Botões */
   button{
     appearance:none;border:0;border-radius:12px;padding:12px 14px;
-    background: var(--accent);color:#ffffff;font-weight:700;cursor:pointer
+    background: var(--accent); color:#ffffff; font-weight:700; cursor:pointer;
   }
   button.secondary{
-    background:transparent;color:var(--text);
-    border:1px solid var(--border)
+    background:transparent;color:var(--text); border:1px solid var(--border);
   }
 
   .muted{color:var(--muted)}
-
-  /* Linhas da lista de resultados */
   .stat{
     display:grid;grid-template-columns:1fr auto;gap:6px;padding:10px 0;
-    border-bottom:1px dashed var(--border)
+    border-bottom:1px dashed var(--border);
   }
   .stat:last-child{border-bottom:0}
-
   .score{font-size:56px;font-weight:900;letter-spacing:-.03em}
   .badge{display:inline-block;padding:6px 10px;border-radius:999px;
          background:#f3f4f6;border:1px solid var(--border);font-size:12px;color:var(--text)}
@@ -97,7 +81,7 @@
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
   .link{color:#2563eb;text-decoration:none}
 
-  /* Social card */
+  /* Social */
   .social-row{display:flex;justify-content:center;gap:40px;margin-top:10px}
   .social-item{display:flex;flex-direction:column;align-items:center;text-decoration:none}
   .icon-box{width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center}
@@ -106,26 +90,24 @@
   .social-label{font-size:13px;margin-top:6px;color:var(--muted)}
   </style>
 
-  <!-- Carrega SheetJS com 3 CDNs + timeout; expõe Promise global __XLSXReady -->
+  <!-- Loader do SheetJS (3 CDNs + timeout) -->
   <script>
     window.__XLSXReady = new Promise((resolve, reject) => {
       let settled = false;
-      function done(){ if(!settled){ settled=true; console.log("SheetJS carregado."); resolve(); } }
+      function done(){ if(!settled){ settled=true; resolve(); } }
       function fail(msg){ if(!settled){ settled=true; console.warn(msg); reject(new Error(msg)); } }
-
       const timeout = setTimeout(() => fail("Timeout ao carregar SheetJS."), 12000);
       const cdns = [
         "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js",
         "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.19.3/xlsx.full.min.js"
       ];
-
       (function tryNext(i){
         if (i >= cdns.length) { clearTimeout(timeout); fail("Falha ao carregar SheetJS (todas as CDNs)."); return; }
         const s = document.createElement('script');
         s.src = cdns[i];
         s.onload = () => { clearTimeout(timeout); done(); };
-        s.onerror = () => { console.warn("Falha em:", cdns[i], " — tentando a próxima…"); tryNext(i+1); };
+        s.onerror = () => { tryNext(i+1); };
         document.head.appendChild(s);
       })(0);
     });
@@ -136,42 +118,38 @@
     <div class="title">CALPES <span class="badge">beta</span></div>
     <div class="subtitle">Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde</div>
 
-    <!-- === GRID PRINCIPAL === -->
+    <!-- === GRID PRINCIPAL (lado a lado) === -->
     <div class="grid">
 
       <!-- COLUNA ESQUERDA: TEXTO -->
-<div>
-  <div class="card pad">
-    <h2>Texto</h2>
-    <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
-    <div class="row help">
-      <button id="calc">Calcular</button>
-      <button class="secondary" id="clear">Limpar</button>
-      <span class="muted small">Dica: você pode também informar contagens manualmente abaixo (sobrepõe a detecção automática).</span>
-    </div>
-
-    <div class="inputs" style="margin-top:12px">
       <div>
-        <label class="small muted">Frases</label>
-        <input id="sentencesManual" type="number" min="0" placeholder="auto" />
+        <div class="card pad">
+          <h2>Texto</h2>
+          <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
+          <div class="row help">
+            <button id="calc">Calcular</button>
+            <button class="secondary" id="clear">Limpar</button>
+            <span class="muted small">Dica: você pode também informar contagens manualmente abaixo (sobrepõe a detecção automática).</span>
+          </div>
+          <div class="inputs" style="margin-top:12px">
+            <div>
+              <label class="small muted">Frases</label>
+              <input id="sentencesManual" type="number" min="0" placeholder="auto" />
+            </div>
+            <div>
+              <label class="small muted">Palavras</label>
+              <input id="wordsManual" type="number" min="0" placeholder="auto" />
+            </div>
+            <div>
+              <label class="small muted">Sílabas</label>
+              <input id="syllablesManual" type="number" min="0" placeholder="auto" />
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label class="small muted">Palavras</label>
-        <input id="wordsManual" type="number" min="0" placeholder="auto" />
-      </div>
-      <div>
-        <label class="small muted">Sílabas</label>
-        <input id="syllablesManual" type="number" min="0" placeholder="auto" />
-      </div>
-    </div>
-  </div>
-</div>
 
-
-      <!-- COLUNA DIREITA: RESULTADOS + AÇÕES -->
+      <!-- COLUNA DIREITA: RESULTADOS -->
       <div>
-
-        <!-- Resultados -->
         <div class="card pad">
           <h2>Resultados</h2>
           <div class="stat"><span class="muted">Frases</span><strong id="sentencesOut">–</strong></div>
@@ -208,48 +186,44 @@
             </table>
           </div>
         </div>
+      </div>
 
-        <!-- Ações / Exportação -->
-        <div class="card pad" style="margin-top:10px">
-          <div class="row" style="align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
-            <button id="save">Salvar contagem</button>
-            <button id="exportAll" class="secondary">Exportar análises salvas</button>
-            <button id="downloadXlsx" class="secondary">Baixar resultado atual</button>
-            <button id="copy" class="secondary">Copiar resultado atual</button>
-            <button id="clearAll" class="secondary">Zerar armazenamento</button>
-          </div>
-          <div style="text-align:center; margin-top:8px;">
-            <span class="muted small" id="savedInfo">0 salvas</span> ·
-            <span class="muted small" id="analyzedInfo">0 analisados</span>
-          </div>
-        </div>
-        
-    <!-- Card social -->
+    </div><!-- /grid -->
+
+    <!-- === AÇÕES / EXPORTAÇÃO (fora do grid, largura total) === -->
+    <div class="card pad" style="margin-top:10px">
+      <div class="row" style="align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
+        <button id="save">Salvar contagem</button>
+        <button id="exportAll" class="secondary">Exportar análises salvas</button>
+        <button id="downloadXlsx" class="secondary">Baixar resultado atual</button>
+        <button id="copy" class="secondary">Copiar resultado atual</button>
+        <button id="clearAll" class="secondary">Zerar armazenamento</button>
+      </div>
+      <div style="text-align:center; margin-top:8px;">
+        <span class="muted small" id="savedInfo">0 salvas</span> ·
+        <span class="muted small" id="analyzedInfo">0 analisados</span>
+      </div>
+    </div>
+
+    <!-- === SOCIAL (fora do grid, largura total) === -->
     <div class="card pad" style="margin-top:10px; text-align:center;">
       <p class="small muted">Saiba mais sobre meu trabalho:</p>
       <div class="social-row">
-        
-        <!-- Lattes -->
         <a class="social-item" href="https://lattes.cnpq.br/6753755414872565" target="_blank" rel="noopener">
           <span class="icon-box">
-            <img src="https://lh5.googleusercontent.com/proxy/4d6-dVOcMrp7HoU9t-bhgfgoqSLWbcgosoSMPp956YzTQzTfRfFDiUXR3hssFIJDTEe0ozmcq4wv6E7AiZn7-kNEwVvhboggb9gHgMMh-webTRvzg8ndDb7Sffpa9N2N4ThiQboH11-KkcPt_C4Qj0ZXxeEREqmIp7k"
-                 alt="Lattes"/>
+            <img src="https://lh5.googleusercontent.com/proxy/4d6-dVOcMrp7HoU9t-bhgfgoqSLWbcgosoSMPp956YzTQzTfRfFDiUXR3hssFIJDTEe0ozmcq4wv6E7AiZn7-kNEwVvhboggb9gHgMMh-webTRvzg8ndDb7Sffpa9N2N4ThiQboH11-KkcPt_C4Qj0ZXxeEREqmIp7k" alt="Lattes"/>
           </span>
           <span class="social-label">Lattes</span>
         </a>
-
-        <!-- LinkedIn -->
         <a class="social-item" href="https://www.linkedin.com/in/stefaniboorges/" target="_blank" rel="noopener">
           <span class="icon-box">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="LinkedIn">
-              <path fill="#0a66c2"
-                d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5V9h3v10zM6.5 7.6A1.75 1.75 0 1 1 6.5 4.1a1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V19h-3V9h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59V19z"/>
+              <path fill="#0a66c2" d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5V9h3v10zM6.5 7.6A1.75 1.75 0 1 1 6.5 4.1a1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V19h-3V9h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59V19z"/>
             </svg>
           </span>
           <span class="social-label">LinkedIn</span>
         </a>
       </div>
-
       <p class="foot" style="margin-top:15px">
         © 2025 CALPES · Stéfani Borges · Licença MIT · Esta é uma ferramenta educacional.
       </p>
@@ -259,11 +233,9 @@
 
   <!-- JS principal -->
   <script>
-  /* ===== Regex e utilidades ===== */
   const VOWEL_GROUPS = /[aeiouáéíóúâêôãõàü]+/gi;
   const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ]+)*/g;
 
-  /* ===== Persistência ===== */
   const STORAGE_KEYS = { saved: 'calpes_saved', analyzed: 'calpes_analyzed' };
   let saved = [];
   let analyzedCount = 0;
@@ -283,7 +255,6 @@
     if (a) a.textContent = `${analyzedCount} analisados`;
   }
 
-  /* ===== Helpers ===== */
   function countSentences(text){
     const s = (text||"").replace(/\.{3,}/g, ".");
     const pieces = s.split(/[.!?;:]+/).map(t=>t.trim()).filter(Boolean);
@@ -313,7 +284,6 @@
     return "Muito difícil (nível superior)";
   }
 
-  /* ===== Cálculo principal ===== */
   function compute(){
     const text = document.getElementById('text').value;
     const sManual = parseInt(document.getElementById('sentencesManual').value,10);
@@ -342,13 +312,11 @@
 
     window.__lastResult = { sentences, words, syllables, wps, spw, score, classification: classify(score) };
 
-    // só conta analisados; não salva automaticamente
     analyzedCount += 1;
     updateSavedInfo();
     persistState();
   }
 
-  /* ===== Armazenamento explícito ===== */
   function saveCurrent() {
     if (!window.__lastResult) { alert('Calcule primeiro para salvar a contagem.'); return; }
     const txt = (document.getElementById('text').value || '').trim();
@@ -370,7 +338,6 @@
     persistState();
   }
 
-  /* ===== Toast ===== */
   function showToast(msg){
     const t = document.createElement('div');
     t.textContent = msg;
@@ -384,7 +351,6 @@
     setTimeout(()=>{ t.style.opacity = '0'; setTimeout(()=> t.remove(), 200); }, 1500);
   }
 
-  /* ===== Exportações (XLSX com fallback CSV) ===== */
   async function exportAllXlsx(){
     try{
       showToast('Preparando exportação…');
@@ -414,21 +380,16 @@
     }
   }
 
-  // Exportar resultado atual (somente resultados, UTF-8)
   async function downloadAsXlsx() {
     try {
       await window.__XLSXReady;
-      if (typeof XLSX === 'undefined') {
-        alert('Biblioteca do Excel não carregou. Tente recarregar a página.');
-        return;
-      }
+      if (typeof XLSX === 'undefined') { alert('Biblioteca do Excel não carregou.'); return; }
       if (!window.__lastResult) {
         const txt = (document.getElementById('text').value || '').trim();
         if (!txt) { alert('Cole um texto e clique em Calcular antes de baixar.'); return; }
         compute();
         if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
       }
-
       const r = window.__lastResult;
       const resultados = [
         ['Campo', 'Valor'],
@@ -441,7 +402,6 @@
         ['Classificação', r.classification],
         ['Gerado em', new Date().toLocaleString('pt-BR')]
       ];
-
       const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
@@ -452,11 +412,8 @@
     }
   }
 
-  /* ===== Listeners ===== */
   document.addEventListener('DOMContentLoaded', function(){
-    loadState();
-    updateSavedInfo();
-
+    loadState(); updateSavedInfo();
     document.getElementById('calc')?.addEventListener('click', compute);
     document.getElementById('clear')?.addEventListener('click', ()=>{
       document.getElementById('text').value = '';
@@ -465,7 +422,6 @@
       });
       window.__lastResult = null;
     });
-
     document.getElementById('copy')?.addEventListener('click', ()=>{
       const r = window.__lastResult;
       const text = r
@@ -473,7 +429,6 @@
         : 'Sem resultados ainda.';
       navigator.clipboard.writeText(text).then(()=> showToast('Resultado atual copiado!'));
     });
-
     document.getElementById('save')?.addEventListener('click', saveCurrent);
     document.getElementById('exportAll')?.addEventListener('click', exportAllXlsx);
     document.getElementById('downloadXlsx')?.addEventListener('click', downloadAsXlsx);
@@ -482,5 +437,6 @@
   </script>
 </body>
 </html>
+
 
 

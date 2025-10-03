@@ -140,36 +140,33 @@
     <div class="grid">
 
       <!-- COLUNA ESQUERDA: TEXTO -->
+<div>
+  <div class="card pad">
+    <h2>Texto</h2>
+    <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
+    <div class="row help">
+      <button id="calc">Calcular</button>
+      <button class="secondary" id="clear">Limpar</button>
+      <span class="muted small">Dica: você pode também informar contagens manualmente abaixo (sobrepõe a detecção automática).</span>
+    </div>
+
+    <div class="inputs" style="margin-top:12px">
       <div>
-        <div class="card pad">
-          <h2>Texto</h2>
-          <textarea id="text" placeholder="Cole o texto para avaliação aqui..."></textarea>
-          <div class="row help">
-            <button id="calc">Calcular</button>
-            <button class="secondary" id="clear">Limpar</button>
-            <span class="muted small">Dica: você pode também informar contagens manualmente abaixo (sobrepõe a detecção automática).</span>
-          </div>
-
-          <div class="inputs" style="margin-top:12px">
-            <div>
-              <label class="small muted">Frases</label>
-              <input id="sentencesManual" type="number" min="0" placeholder="auto" />
-            </div>
-            <div>
-              <label class="small muted">Palavras</label>
-              <input id="wordsManual" type="number" min="0" placeholder="auto" />
-            </div>
-            <div>
-              <label class="small muted">Sílabas</label>
-              <input id="syllablesManual" type="number" min="0" placeholder="auto" />
-            </div>
-          </div>
-
-          <p class="foot" style="margin-top:10px">
-            O cálculo de sílabas é feito de forma aproximada, considerando as vogais. Para textos técnicos, prefira validar com amostras manuais.
-          </p>
-        </div>
+        <label class="small muted">Frases</label>
+        <input id="sentencesManual" type="number" min="0" placeholder="auto" />
       </div>
+      <div>
+        <label class="small muted">Palavras</label>
+        <input id="wordsManual" type="number" min="0" placeholder="auto" />
+      </div>
+      <div>
+        <label class="small muted">Sílabas</label>
+        <input id="syllablesManual" type="number" min="0" placeholder="auto" />
+      </div>
+    </div>
+  </div>
+</div>
+
 
       <!-- COLUNA DIREITA: RESULTADOS + AÇÕES -->
       <div>

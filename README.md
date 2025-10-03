@@ -40,8 +40,8 @@ O índice de Flesch adaptado ao português é calculado como:
 
 ## 📥 Resultados
 
-- É possível **baixar os resultados em Excel (.csv)**.  
-- Também é possível **copiar um resumo em texto** para colar em relatórios ou artigos.  
+- É possível **baixar os resultados em Excel**.  Os botões “Exportar todas” e “Baixar resultados” geram arquivos em formato de planilha. Por padrão, o formato é .xlsx. Caso a biblioteca externa não esteja disponível, o sistema exporta em .csv, que pode ser aberto normalmente no Excel, Google Sheets ou LibreOffice. Isso garante que você sempre consiga salvar seus resultados, independentemente da disponibilidade de bibliotecas externas.
+- Também é possível **copiar um resumo em texto** da análise em tela, para colar em relatórios ou artigos.  
   
 ---
 

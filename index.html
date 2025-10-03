@@ -336,21 +336,21 @@
     persistState();
   }
   function clearSaved() {
-  if (!saved.length && analyzed === 0) { 
-    alert('O armazenamento já está vazio.'); 
-    return; 
+  // só avisa que está vazio se NÃO houver salvas E analisados
+  if (!saved.length && analyzedCount === 0) {
+    alert('O armazenamento já está vazio.');
+    return;
   }
   if (!confirm('Tem certeza que deseja zerar o armazenamento?')) return;
 
-  // zera salvos
+  // zera ambos
   saved.length = 0;
-
-  // zera analisados também
-  analyzed = 0;
+  analyzedCount = 0;
 
   updateSavedInfo();
-  persistState();
+  persistState(); // já grava analyzedCount=0 e saved=[]
 }
+
 
 
   function showToast(msg){

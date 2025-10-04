@@ -47,9 +47,9 @@ O índice de Flesch adaptado ao português é calculado como:
 
 ## 📖 Histórico de desenvolvimento
 
-A CALPES foi originalmente desenvolvida em VBA (Visual Basic for Applications) para Excel, com o objetivo de analisar a legibilidade de materiais educativos em saúde.
+A CALPES foi originalmente desenvolvida em VBA (Visual Basic for Applications) para Excel, com o objetivo de analisar a leiturabilidade de materiais educativos em saúde.
 
-Posteriormente, o código foi adaptado e transformado em uma aplicação web (HTML, CSS e JavaScript) com apoio do ChatGPT (OpenAI, versão GPT-5), mantendo a lógica original e ampliando a acessibilidade da ferramenta para uso direto no navegador.
+Posteriormente, o código foi adaptado e transformado em uma aplicação web (HTML, CSS e JavaScript) com apoio do ChatGPT (OpenAI, versão GPT-5), mantendo a lógica original e ampliando a acessibilidade da ferramenta para uso direto em navegador.
 
 ---
 

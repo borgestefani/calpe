@@ -407,17 +407,49 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Todas as contagens');
       XLSX.writeFile(wb, 'calpes_todas_as_contagens.xlsx');
-    }catch(e){
+        }catch(e){
       console.warn('XLSX indisponível, usando CSV.', e);
       if (saved.length === 0) { alert('Não há contagens salvas para exportar.'); return; }
-      const header = ['#','Data/Hora','Frases','Palavras','Sílabas','Palavras por frase','Sílabas por palavra','Índice de Leiturabilidade de Flesch','Classificação','Trecho'];
+
+      // cabeçalho descritivo
+      const header = [
+        '#','Data/Hora','Frases','Palavras','Sílabas',
+        'Palavras por frase','Sílabas por palavra',
+        'Índice de Leiturabilidade de Flesch','Classificação','Trecho do texto'
+      ];
+
       const lines = [header.join(';')];
+
       saved.forEach((r,i)=>{
-        const row = [i+1,r.createdAt,r.sentences,r.words,r.syllables,r.wps.toFixed(2),r.spw.toFixed(2),r.score.toFixed(1),r.classification,('"'+(r.snippet||'').replace(/"/g,'""')+'"')];
+        // evita quebras de linha e escapa aspas
+        const snippet = (r.snippet || '')
+          .replace(/\r?\n/g, ' ')
+          .replace(/"/g, '""');
+
+        const row = [
+          i+1,
+          r.createdAt,
+          r.sentences,
+          r.words,
+          r.syllables,
+          Number(r.wps).toFixed(2),
+          Number(r.spw).toFixed(2),
+          Number(r.score).toFixed(1),
+          r.classification,
+          `"${snippet}"`
+        ];
+
         lines.push(row.join(';'));
       });
-      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'calpes_todas_as_contagens.csv'; a.click(); URL.revokeObjectURL(a.href);
+
+      // >>> ADIÇÃO DO BOM UTF-8 E CRLF <<<
+      const csv = '\uFEFF' + lines.join('\r\n');
+      const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'calpes_todas_as_contagens.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
     }
   }
 

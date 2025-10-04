@@ -400,36 +400,64 @@
   }
 
   async function downloadAsXlsx() {
-    try {
-      await window.__XLSXReady;
-      if (typeof XLSX === 'undefined') { alert('Biblioteca do Excel não carregou.'); return; }
-      if (!window.__lastResult) {
-        const txt = (document.getElementById('text').value || '').trim();
-        if (!txt) { alert('Insira o texto e clique em Calcular antes de baixar.'); return; }
-        compute();
-        if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
-      }
-      const r = window.__lastResult;
-      const resultados = [
-        ['Campo', 'Valor'],
-        ['Frases', r.sentences],
-        ['Palavras', r.words],
-        ['Sílabas', r.syllables],
-        ['Palavras por frase', Number(r.wps).toFixed(2)],
-        ['Sílabas por palavra', Number(r.spw).toFixed(2)],
-        ['Índice de Leiturabilidade de Flesch', Number(r.score).toFixed(1)],
-        ['Classificação', r.classification],
-        ['Gerado em', new Date().toLocaleString('pt-BR')]
-      ];
-      const wsResultados = XLSX.utils.aoa_to_sheet(resultados);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsResultados, 'Resultados');
-      XLSX.writeFile(wb, 'calpes_resultados.xlsx', { compression: true });
-    } catch (err) {
-      console.error(err);
-      alert('Não foi possível gerar o arquivo .xlsx. Veja o console (F12 → Console) para detalhes.');
+  try {
+    await window.__XLSXReady;
+    if (typeof XLSX === 'undefined' || !XLSX.utils || !XLSX.writeFile) {
+      throw new Error('XLSX indisponível');
     }
+
+    const r = window.__lastResult;
+    if (!r) {
+      const txt = (document.getElementById('text').value || '').trim();
+      if (!txt) { alert('Insira um texto e clique em Calcular antes de baixar.'); return; }
+      compute();
+    }
+    if (!window.__lastResult) { alert('Não foi possível gerar o resultado.'); return; }
+
+    const res = window.__lastResult;
+    const dados = [
+      ['Campo', 'Valor'],
+      ['Sílabas', res.syllables],
+      ['Palavras', res.words],
+      ['Frases',  res.sentences],
+      ['Palavras por frase', Number(res.wps).toFixed(2)],
+      ['Sílabas por palavra', Number(res.spw).toFixed(2)],
+      ['Índice de Leiturabilidade de Flesch', Number(res.score).toFixed(1)],
+      ['Classificação', res.classification],
+      ['Gerado em', new Date().toLocaleString('pt-BR')]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(dados);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+    XLSX.writeFile(wb, 'calpes_resultados.xlsx', { compression: true });
+    if (typeof showToast === 'function') showToast('Arquivo .xlsx gerado!');
+  } catch (err) {
+    console.warn('Falhou XLSX, usando CSV.', err);
+
+    const r = window.__lastResult;
+    if (!r) { alert('Calcule um texto antes de baixar.'); return; }
+    const linhas = [
+      'Campo;Valor',
+      `Sílabas;${r.syllables}`,
+      `Palavras;${r.words}`,
+      `Frases;${r.sentences}`,
+      `Palavras por frase;${Number(r.wps).toFixed(2)}`,
+      `Sílabas por palavra;${Number(r.spw).toFixed(2)}`,
+      `Índice de Leiturabilidade de Flesch;${Number(r.score).toFixed(1)}`,
+      `Classificação;${r.classification}`,
+      `Gerado em;${new Date().toLocaleString('pt-BR')}`
+    ];
+    const blob = new Blob(['\uFEFF' + linhas.join('\n')], { type:'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'calpes_resultados.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    if (typeof showToast === 'function') showToast('Baixado em CSV (fallback).');
   }
+}
+
 
   document.addEventListener('DOMContentLoaded', function(){
     loadState(); updateSavedInfo();

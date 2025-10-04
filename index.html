@@ -243,7 +243,7 @@
   <!-- JS principal -->
   <script>
   const VOWEL_GROUPS = /[aeiouáéíóúâêôãõàü]+/gi;
-  const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*/g;
+  const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?:['’--][A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*/g;
 
   const STORAGE_KEYS = { saved: 'calpes_saved', analyzed: 'calpes_analyzed' };
   let saved = [];
@@ -275,17 +275,35 @@
   }
   function syllablesInWord(w){
     if(!w) return 0;
-    
-    // NOVO: números (ex.: 2020, 3,14, 2.5) contam como 1 sílaba
-  if (/^\d+(?:[.,]\d+)?$/.test(w)) return 1;
-    
-    const lower = w.toLowerCase();
-    const groups = lower.match(VOWEL_GROUPS);
-    let syl = groups ? groups.length : 0;
-    if(/g[uü]e|g[uü]i|q[uü]e|q[uü]i/.test(lower)) syl -= 1;
-    if(/ai|ei|oi|ui|au|eu|ou|ão|ãe/.test(lower)) syl -= 0.5;
-    return Math.round(Math.max(1, syl));
+    // hífen: soma partes
+  const HYPH = /[\u2010\u2011\u2012\u2013\u2014-]/;
+  if (HYPH.test(w)) {
+    return w.split(HYPH).filter(Boolean).reduce((acc, part) => acc + syllablesInWord(part), 0);
   }
+
+  // números = 1 sílaba
+  if (/^\d+(?:[.,]\d+)?$/.test(w)) return 1;
+
+  const lower = w.toLowerCase();
+
+  // hiato antes de "ões"/"ães" (aviões, escorpiões, cristãezinhos...)
+  // cada ocorrência soma +1 sílaba
+  const extraHiatus = (lower.match(/i(?:ões|ães)/g) || []).length;
+
+  // grupos de vogais
+  const groups = lower.match(/[aeiouáéíóúâêôãõàü]+/gi);
+  let syl = groups ? groups.length : 0;
+
+  // QU/GU + e/i: "u" não vocaliza
+  syl -= (lower.match(/(?:g[uü](?=[ei])|q[uü](?=[ei]))/g) || []).length;
+
+  // ditongos decrescentes comuns (desconto 0,5 por ocorrência)
+  syl -= ((lower.match(/(?:ai|ei|oi|ui|au|eu|ou|ão|ãe|õe)/g) || []).length) * 0.5;
+
+  // aplica o extra do hiato e finaliza
+  syl += extraHiatus;
+  return Math.round(Math.max(1, syl));
+}
   function countSyllables(text){
     const words = (text||"").match(WORD_RE) || [];
     return words.reduce((sum,w)=> sum + syllablesInWord(w), 0);

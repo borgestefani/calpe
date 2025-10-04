@@ -243,7 +243,7 @@
   <!-- JS principal -->
   <script>
   const VOWEL_GROUPS = /[aeiouáéíóúâêôãõàü]+/gi;
-  const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ]+)*/g;
+  const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*/g;
 
   const STORAGE_KEYS = { saved: 'calpes_saved', analyzed: 'calpes_analyzed' };
   let saved = [];
@@ -275,6 +275,10 @@
   }
   function syllablesInWord(w){
     if(!w) return 0;
+    
+    // NOVO: números (ex.: 2020, 3,14, 2.5) contam como 1 sílaba
+  if (/^\d+(?:[.,]\d+)?$/.test(w)) return 1;
+    
     const lower = w.toLowerCase();
     const groups = lower.match(VOWEL_GROUPS);
     let syl = groups ? groups.length : 0;

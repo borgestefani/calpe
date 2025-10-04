@@ -64,8 +64,7 @@ Disponível em: https://borgestefani.github.io/calpes/
 
 ## 📜 Licença
 
-Este projeto é distribuído sob a Licença MIT (MIT License).
-Você pode usar, modificar e distribuir livremente, desde que mantenha a atribuição.  
+Você pode usar, modificar e distribuir livremente, desde que atribua os devidos créditos à autora.  
 
 ---
 

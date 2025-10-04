@@ -37,7 +37,17 @@
 .section { 
   margin-top:16px;   /* mesmo valor do gap da grid */
 }
-    
+/* Grid para "Como citar" (esq) + Social (dir) */
+.grid-cite-social{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  margin-top:16px; /* alinha com o .section */
+}
+@media (max-width: 900px){
+  .grid-cite-social{ grid-template-columns: 1fr; }
+}
+
   .card{
     background: var(--card);
     border: 1px solid var(--border);
@@ -214,29 +224,55 @@
       </div>
     </div>
 
-    <!-- === SOCIAL (fora do grid, largura total) === -->
-   <div class="card pad section" style="text-align:center;">
-      <p class="small muted">Saiba mais sobre meu trabalho:</p>
-      <div class="social-row">
-        <a class="social-item" href="https://lattes.cnpq.br/6753755414872565" target="_blank" rel="noopener">
-          <span class="icon-box">
-            <img src="https://lh5.googleusercontent.com/proxy/4d6-dVOcMrp7HoU9t-bhgfgoqSLWbcgosoSMPp956YzTQzTfRfFDiUXR3hssFIJDTEe0ozmcq4wv6E7AiZn7-kNEwVvhboggb9gHgMMh-webTRvzg8ndDb7Sffpa9N2N4ThiQboH11-KkcPt_C4Qj0ZXxeEREqmIp7k" alt="Lattes"/>
-          </span>
-          <span class="social-label">Lattes</span>
-        </a>
-        <a class="social-item" href="https://www.linkedin.com/in/stefaniboorges/" target="_blank" rel="noopener">
-          <span class="icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="LinkedIn">
-              <path fill="#0a66c2" d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5V9h3v10zM6.5 7.6A1.75 1.75 0 1 1 6.5 4.1a1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V19h-3V9h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59V19z"/>
-            </svg>
-          </span>
-          <span class="social-label">LinkedIn</span>
-        </a>
-      </div>
-      <p class="foot" style="margin-top:15px">
-        © 2025 CALPES · Stéfani Borges 
-      </p>
+    <!-- === COMO CITAR (esq) + SOCIAL (dir) === -->
+<div class="grid-cite-social section">
+  <!-- Como citar (ESQUERDA) -->
+  <div class="card pad">
+    <h2>Como citar</h2>
+    <p class="small muted" style="margin-top:0">
+      Use a referência abaixo ao citar a CALPES em trabalhos acadêmicos:
+    </p>
+
+    <div id="citationText"
+         class="mono small"
+         style="background:#f3f4f6;border:1px solid var(--border);border-radius:10px;padding:10px;">
+      <!-- O texto é preenchido via JS no onload -->
     </div>
+
+    <div class="row" style="margin-top:10px;justify-content:flex-end;">
+      <button id="copyCitation" class="secondary">Copiar citação</button>
+    </div>
+  </div>
+
+  <!-- Social (DIREITA) -->
+  <div class="card pad" style="text-align:center;">
+    <h2>Conecte-se</h2>
+    <p class="small muted" style="margin-top:0">Saiba mais sobre meu trabalho:</p>
+
+    <div class="social-row">
+      <a class="social-item" href="https://lattes.cnpq.br/6753755414872565" target="_blank" rel="noopener">
+        <span class="icon-box">
+          <img src="https://lh5.googleusercontent.com/proxy/4d6-dVOcMrp7HoU9t-bhgfgoqSLWbcgosoSMPp956YzTQzTfRfFDiUXR3hssFIJDTEe0ozmcq4wv6E7AiZn7-kNEwVvhboggb9gHgMMh-webTRvzg8ndDb7Sffpa9N2N4ThiQboH11-KkcPt_C4Qj0ZXxeEREqmIp7k" alt="Lattes"/>
+        </span>
+        <span class="social-label">Lattes</span>
+      </a>
+
+      <a class="social-item" href="https://www.linkedin.com/in/stefaniboorges/" target="_blank" rel="noopener">
+        <span class="icon-box">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="LinkedIn">
+            <path fill="#0a66c2" d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5V9h3v10zM6.5 7.6A1.75 1.75 0 1 1 6.5 4.1a1.75 1.75 0 0 1 0 3.5zM20 19h-3v-5.6c0-1.34-.03-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V19h-3V9h2.88v1.37h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.59V19z"/>
+          </svg>
+        </span>
+        <span class="social-label">LinkedIn</span>
+      </a>
+    </div>
+
+    <p class="foot" style="margin-top:15px">
+      © 2025 CALPES · Stéfani Borges · Licença MIT
+    </p>
+  </div>
+</div>
+
 
   </div><!-- /wrap -->
 
@@ -534,8 +570,27 @@
     document.getElementById('exportAll')?.addEventListener('click', exportAllXlsx);
     document.getElementById('downloadXlsx')?.addEventListener('click', downloadAsXlsx);
     document.getElementById('clearAll')?.addEventListener('click', clearSaved);
+    
+    // preenche o bloco de citação ao carregar
+(function buildCitation(){
+  const url = window.location.href;
+  const acesso = new Date().toLocaleDateString('pt-BR');
+  const texto = `Borges, S. (2025). CALPES — Calculadora de Leiturabilidade em Português ` +
+                `para Materiais Educativos em Saúde. Disponível em: ${url}. Acesso em: ${acesso}.`;
+  const el = document.getElementById('citationText');
+  if (el) el.textContent = texto;
+})();
+    // botão para copiar a citação
+document.getElementById('copyCitation')?.addEventListener('click', ()=>{
+  const el = document.getElementById('citationText');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent || '').then(()=>{
+    if (typeof showToast === 'function') showToast('Citação copiada!');
   });
-  </script>
+});
+
+});
+</script>
 </body>
 </html>
 

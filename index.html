@@ -266,7 +266,7 @@
 
   function countSentences(text){
     const s = (text||"").replace(/\.{3,}/g, ".");
-    const pieces = s.split(/[.!?;:]+/).map(t=>t.trim()).filter(Boolean);
+    const pieces = s.split(/[.!?;]+/).map(t=>t.trim()).filter(Boolean);
     return Math.max(1, pieces.length);
   }
   function countWords(text){

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CALPES – Calculadora de Leiturabilidade</title>
-  <meta name="description" content="CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde." />
+  <title>CALPE – Calculadora Automatizada de Leiturabilidade de Produtos Educativos</title>
+  <meta name="description" content="CALPE – Calculadora Automatizada de Leiturabilidade de Produtos Educativos." />
   <style>
   :root{
     --bg-grad: linear-gradient(to bottom, #ffffff, #e5e7eb);
@@ -130,8 +130,8 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="title">CALPES <span class="badge">beta</span></div>
-    <div class="subtitle">Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde</div>
+    <div class="title">CALPE <span class="badge">beta</span></div>
+    <div class="subtitle">Calculadora Automatizada de Leiturabilidade de Produtos Educativos</div>
 
     <!-- === GRID PRINCIPAL (lado a lado) === -->
     <div class="grid">
@@ -230,7 +230,7 @@
   <div class="card pad">
     <h2>Como citar</h2>
     <p class="small muted" style="margin-top:0">
-      Use a referência abaixo ao citar a CALPES em trabalhos acadêmicos:
+      Use a referência abaixo ao citar a CALPE em trabalhos acadêmicos:
     </p>
 
     <div id="citationText"
@@ -268,7 +268,7 @@
     </div>
 
     <p class="foot" style="margin-top:45px">
-      © 2025 CALPES · Stéfani Borges
+      © 2025 CALPE · Stéfani Borges
     </p>
   </div>
 </div>
@@ -281,7 +281,7 @@
   const VOWEL_GROUPS = /[aeiouáéíóúâêôãõàü]+/gi;
   const WORD_RE = /[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?:['’-][A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*/g;
 
-  const STORAGE_KEYS = { saved: 'calpes_saved', analyzed: 'calpes_analyzed' };
+  const STORAGE_KEYS = { saved: 'calpe_saved', analyzed: 'calpe_analyzed' };
   let saved = [];
   let analyzedCount = 0;
 
@@ -442,7 +442,7 @@
       const ws = XLSX.utils.aoa_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Todas as contagens');
-      XLSX.writeFile(wb, 'calpes_todas_as_contagens.xlsx');
+      XLSX.writeFile(wb, 'calpe_todas_as_contagens.xlsx');
         }catch(e){
       console.warn('XLSX indisponível, usando CSV.', e);
       if (saved.length === 0) { alert('Não há contagens salvas para exportar.'); return; }
@@ -483,7 +483,7 @@
       const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'calpes_todas_as_contagens.csv';
+      a.download = 'calpe_todas_as_contagens.csv';
       a.click();
       URL.revokeObjectURL(a.href);
     }
@@ -520,7 +520,7 @@
     const ws = XLSX.utils.aoa_to_sheet(dados);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
-    XLSX.writeFile(wb, 'calpes_resultados.xlsx', { compression: true });
+    XLSX.writeFile(wb, 'calpe_resultados.xlsx', { compression: true });
     if (typeof showToast === 'function') showToast('Arquivo .xlsx gerado!');
   } catch (err) {
     console.warn('Falhou XLSX, usando CSV.', err);
@@ -541,7 +541,7 @@
     const blob = new Blob(['\uFEFF' + linhas.join('\n')], { type:'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'calpes_resultados.csv';
+    a.download = 'calpe_resultados.csv';
     a.click();
     URL.revokeObjectURL(a.href);
     if (typeof showToast === 'function') showToast('Baixado em CSV (fallback).');
@@ -575,8 +575,8 @@
 (function buildCitation(){
   const url = window.location.href;
   const acesso = new Date().toLocaleDateString('pt-BR');
-  const texto = `Borges, S. S. (2025). CALPES — Calculadora de Leiturabilidade em Português ` +
-                `para Materiais Educativos em Saúde. Disponível em: ${url}. Acesso em: ${acesso}.`;
+  const texto = `Borges, S. S. (2025). CALPE — Calculadora Automatizada ` +
+                `de Leiturabilidade de Produtos Educativos. Disponível em: ${url}. Acesso em: ${acesso}.`;
   const el = document.getElementById('citationText');
   if (el) el.textContent = texto;
 })();

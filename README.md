@@ -1,10 +1,10 @@
-# CALPES – Calculadora Automatizada de Leiturabilidade de Produtos Educativos
+# CALPE – Calculadora Automatizada de Leiturabilidade de Produtos Educativos
 
-A **CALPES (Calculadora Automatizada de Leiturabilidade de Produtos Educativos)** é uma ferramenta desenvolvida para avaliar a leiturabilidade de textos em português, baseada no **Índice de Flesch adaptado**.  
+A **CALPE (Calculadora Automatizada de Leiturabilidade de Produtos Educativos)** é uma ferramenta desenvolvida para avaliar a leiturabilidade de textos em português, baseada no **Índice de Flesch adaptado**.  
 
 Ela foi criada com foco na análise de materiais educativos em saúde, mas pode ser utilizada em diferentes contextos para verificar a complexidade de leitura de um texto.
 
-🌐 Versão online: [Acesse aqui](https://borgestefani.github.io/calpes/)  
+🌐 Versão online: [Acesse aqui](https://borgestefani.github.io/calpe/)  
 
 ---
 
@@ -47,7 +47,7 @@ O índice de Flesch adaptado ao português é calculado como:
 
 ## 📖 Histórico de desenvolvimento
 
-A CALPES foi originalmente desenvolvida em VBA (Visual Basic for Applications) para Excel, com o objetivo de analisar a leiturabilidade de materiais educativos em saúde.
+A CALPE foi originalmente desenvolvida em VBA (Visual Basic for Applications) para Excel, com o objetivo de analisar a leiturabilidade de materiais educativos em saúde.
 
 Posteriormente, o código foi adaptado e transformado em uma aplicação web (HTML, CSS e JavaScript) com apoio do ChatGPT (OpenAI, versão GPT-5), mantendo a lógica original e ampliando a acessibilidade da ferramenta para uso direto em navegador.
 
@@ -55,10 +55,10 @@ Posteriormente, o código foi adaptado e transformado em uma aplicação web (HT
 
 ## 📄 Citação
 
-Se utilizar a CALPES em trabalhos acadêmicos, indique a seguinte referência:
+Se utilizar a CALPE em trabalhos acadêmicos, indique a seguinte referência:
 
-BORGES, S.S. CALPES – Calculadora Automatizada de Leiturabilidade de Produtos Educativos (versão web). 2025.
-Disponível em: https://borgestefani.github.io/calpes/
+BORGES, S.S. CALPE – Calculadora Automatizada de Leiturabilidade de Produtos Educativos (versão web). 2025.
+Disponível em: https://borgestefani.github.io/calpe/
 
 ---
 

@@ -1,6 +1,6 @@
-# CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde
+# CALPES – Calculadora Automatizada de Leiturabilidade de Produtos Educativos
 
-A **CALPES (Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde)** é uma ferramenta desenvolvida para avaliar a leiturabilidade de textos em português, baseada no **Índice de Flesch adaptado**.  
+A **CALPES (Calculadora Automatizada de Leiturabilidade de Produtos Educativos)** é uma ferramenta desenvolvida para avaliar a leiturabilidade de textos em português, baseada no **Índice de Flesch adaptado**.  
 
 Ela foi criada com foco na análise de materiais educativos em saúde, mas pode ser utilizada em diferentes contextos para verificar a complexidade de leitura de um texto.
 
@@ -57,7 +57,7 @@ Posteriormente, o código foi adaptado e transformado em uma aplicação web (HT
 
 Se utilizar a CALPES em trabalhos acadêmicos, indique a seguinte referência:
 
-BORGES, S.S. CALPES – Calculadora de Leiturabilidade em Português para Materiais Educativos em Saúde (versão web). 2025.
+BORGES, S.S. CALPES – Calculadora Automatizada de Leiturabilidade de Produtos Educativos (versão web). 2025.
 Disponível em: https://borgestefani.github.io/calpes/
 
 ---
